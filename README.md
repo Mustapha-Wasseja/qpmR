@@ -1,5 +1,9 @@
 # qpmR
 
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
+
 **Quarterly Projection Models for Monetary Policy Analysis in R.**
 
 qpmR builds, solves, and simulates the semi-structural quarterly
