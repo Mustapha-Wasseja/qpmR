@@ -1,0 +1,34 @@
+Package: qpmR
+Title: Quarterly Projection Models for Monetary Policy Analysis
+Version: 0.1.0
+Authors@R:
+    person("Mustapha", "Mohammed", email = "muswaseja@gmail.com",
+           role = c("aut", "cre"))
+Description: Build, solve, and simulate the semi-structural quarterly
+    projection models (QPM) used in central-bank forecasting and policy
+    analysis systems (FPAS). Provides a native R language for declaring
+    gap-form models with model-consistent expectations, automatic handling
+    of long lags and leads via auxiliary states, a generalized Schur (QZ)
+    solver with Blanchard-Kahn diagnostics, steady-state computation,
+    impulse responses, stochastic simulation, and unconditional forecasts
+    with uncertainty bands. Ships the canonical small-open-economy model of
+    Berg, Karam and Laxton (2006), IMF Working Paper 06/81, as a calibrated
+    template.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
+Depends: R (>= 4.1)
+Imports:
+    QZ,
+    stats,
+    graphics,
+    grDevices
+Suggests:
+    testthat (>= 3.0.0),
+    knitr,
+    rmarkdown
+Config/testthat/edition: 3
+VignetteBuilder: knitr
+URL: https://github.com/Mustapha-Wasseja/qpmR
+BugReports: https://github.com/Mustapha-Wasseja/qpmR/issues

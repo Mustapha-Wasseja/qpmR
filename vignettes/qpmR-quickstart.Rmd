@@ -1,0 +1,93 @@
+---
+title: "A forecast in ten minutes: the canonical QPM in qpmR"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A forecast in ten minutes: the canonical QPM in qpmR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>",
+                      fig.width = 7, fig.height = 5)
+```
+
+qpmR implements the class of semi-structural quarterly projection models
+(QPM) used in central-bank Forecasting and Policy Analysis Systems: an
+IS curve, a hybrid Phillips curve, a forward-looking inflation-targeting
+rule, and an exchange-rate block, solved under model-consistent
+expectations.
+
+## The canonical model
+
+`qpm_template("bkl")` ships the canonical Berg–Karam–Laxton (IMF
+WP/06/80–81) small open economy model with an illustrative
+emerging-economy calibration — a 5 percent inflation target and a
+positive country risk premium.
+
+```{r}
+library(qpmR)
+m <- qpm_template("bkl")
+m
+```
+
+The policy rule responds to expected year-on-year inflation four
+quarters ahead, `E(pi4[+4])`; the four-quarter identity uses lags back
+to `pi[-3]`. qpmR turns those long leads and lags into auxiliary states
+automatically when the model is solved.
+
+## Solving and checking
+
+```{r}
+sol <- qpm_solve(m)
+sol
+```
+
+The Blanchard–Kahn line is a real diagnostic: an indeterminate or
+explosive model refuses to solve and the error names the usual economic
+cause. Violating the Taylor principle, for instance:
+
+```{r, error = TRUE}
+qpm_solve(qpm_calibrate(m, c2 = -0.5))
+```
+
+## Monetary transmission
+
+```{r}
+ir <- irf(sol, shock = "eps_i", horizon = 16)
+ir
+plot(ir, vars = c("i", "r", "pi", "y_gap", "q", "pi4"))
+```
+
+A policy tightening raises the real rate, opens a negative output gap,
+appreciates the currency on impact (UIP), and produces the hump-shaped
+disinflation with a mild rebound as policy later eases below neutral —
+the standard QPM transmission story.
+
+## History and forecast
+
+Until the Kalman filter arrives in 0.2, initial states come from
+simulation:
+
+```{r}
+histq <- simulate(sol, nsim = 48, seed = 7, burn = 20)
+fc <- qpm_forecast(sol, from = histq, horizon = 12)
+fc
+plot(fc, vars = c("pi", "i", "y_gap", "q"))
+```
+
+The fan bands are analytic, from the forecast-error variance recursion
+`V_h = P V_{h-1} P' + Q S Q'`.
+
+## Specification checks
+
+```{r}
+qpm_lint(m)
+```
+
+## Where this is going
+
+0.2 adds the multivariate Kalman filter (gaps, `r*`, equilibrium RER,
+shock decompositions); 0.3 adds conditional forecasts, the judgment
+ledger, and forecast rounds; 0.4 Bayesian estimation. See the README
+roadmap.
