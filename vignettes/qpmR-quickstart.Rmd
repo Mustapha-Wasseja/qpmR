@@ -85,9 +85,54 @@ The fan bands are analytic, from the forecast-error variance recursion
 qpm_lint(m)
 ```
 
+## Real data: Czechia
+
+qpmR ships `czechia`, a quarterly dataset from 1996 in the model's units
+(see `?czechia`). With `trends = "rw"` the equilibrium real exchange
+rate and potential growth become random walks — the model then has unit
+roots and `qpm_filter()` switches to diffuse initialization
+automatically.
+
+```{r}
+mcz <- qpm_calibrate(qpm_template("bkl", trends = "rw"),
+                     pi_tar = 2, istar_ss = 2, pistar_ss = 2,
+                     prem_ss = 1, a5 = 0.4)
+cz <- czechia[czechia$period >= "1999", ]
+fit <- qpm_filter(mcz, cz[, c("period", "pi4", "i", "q", "dy_obs",
+                              "istar", "pistar")])
+fit
+```
+
+The smoothed latent states reproduce the known history — the pre-GFC
+boom, the 2009 and 2013 recessions, the COVID crater, the trend real
+appreciation of the koruna, and the post-GFC fall in potential growth:
+
+```{r}
+plot(fit, vars = c("y_gap", "dy_bar", "r_bar", "q_gap"))
+```
+
+Historical shock decomposition of the 2021-23 inflation wave:
+
+```{r}
+dec <- qpm_decompose(fit)
+plot(dec, var = "pi4", periods = (fit$n_obs - 33):fit$n_obs)
+```
+
+And a forecast from the smoothed end-of-sample state:
+
+```{r}
+fc <- qpm_forecast(qpm_solve(mcz), from = fit, horizon = 12)
+plot(fc, vars = c("pi4", "i", "y_gap", "q"))
+```
+
+Note the honesty of the diagnostics on real data: the Ljung-Box test
+flags autocorrelated exchange-rate innovations (the driftless `q_bar`
+random walk absorbs the appreciation trend through its shocks), and the
+2022-23 inflation surprises show up as large outliers. That is the
+model asking for judgment and recalibration — which is what 0.3 is for.
+
 ## Where this is going
 
-0.2 adds the multivariate Kalman filter (gaps, `r*`, equilibrium RER,
-shock decompositions); 0.3 adds conditional forecasts, the judgment
-ledger, and forecast rounds; 0.4 Bayesian estimation. See the README
-roadmap.
+0.3 adds conditional forecasts (anticipated vs unanticipated), the
+judgment ledger, and forecast rounds; 0.4 Bayesian estimation. See the
+README roadmap.

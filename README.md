@@ -41,7 +41,7 @@ Version 0.1 delivers the model layer of that chain.
   `steady_state()`, `eigen_table()`, and `qpm_lint()` for
   specification checks.
 
-And in the development version (the start of 0.2 — filtration):
+And since 0.2 — the filtration layer:
 
 - **`qpm_filter()`** — Kalman filter + RTS smoother over the solved
   model: jointly infers every latent state (output gap, neutral rate,
@@ -58,6 +58,27 @@ And in the development version (the start of 0.2 — filtration):
   qpmR.
 - **`qpm_forecast(from = <filtration>)`** — forecast from the smoothed
   end-of-sample state, with the smoothed history on the fan chart.
+- **Random-walk trends and diffuse initialization** —
+  `qpm_template("bkl", trends = "rw")` makes the equilibrium exchange
+  rate and potential growth unit-root processes; the solver counts unit
+  roots explicitly and the filter switches to a diffuse prior
+  automatically.
+- **A real country dataset** — `czechia`, quarterly from 1996 in model
+  units, compiled reproducibly from FRED/OECD/Eurostat/ECB public
+  endpoints. Filtering it reproduces the known history: the pre-GFC
+  boom, the 2009 and 2013 recessions, the COVID crater, the koruna's
+  trend real appreciation, and the post-GFC fall in potential growth —
+  all pinned in the test suite.
+
+```r
+mcz <- qpm_calibrate(qpm_template("bkl", trends = "rw"),
+                     pi_tar = 2, istar_ss = 2, pistar_ss = 2, prem_ss = 1)
+cz <- czechia[czechia$period >= "1999",
+              c("period", "pi4", "i", "q", "dy_obs", "istar", "pistar")]
+fit <- qpm_filter(mcz, cz)
+plot(fit, vars = c("y_gap", "dy_bar", "r_bar", "q_gap"))
+plot(qpm_decompose(fit), var = "pi4")
+```
 
 ## Quickstart
 
@@ -87,7 +108,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | Version | Focus |
 |---|---|
 | 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
-| 0.2 | Kalman filter/smoother, shock decompositions — **in progress** (filter, smoother, decompositions shipped in the dev version; next: random-walk trends via diffuse initialization, filter-based real-data workflow, example country dataset) |
+| 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
 | 0.3 | Conditional forecasts (`qpm_condition()`, anticipated vs unanticipated), judgment ledger (`add_judgment()`), forecast rounds |
 | 0.4 | Bayesian estimation, identification diagnostics, posterior fans |
 | 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |

@@ -88,7 +88,15 @@ print.qpm_decomposition <- function(x, ...) {
 }
 
 #' @export
-plot.qpm_decomposition <- function(x, var = NULL, drop_zero = TRUE, ...) {
+#' @rdname qpm_decompose
+#' @param x A `qpm_decomposition`.
+#' @param var Variable to plot.
+#' @param drop_zero Drop components that never contribute.
+#' @param periods Optional integer window of period indices to display
+#'   (e.g. `81:110` for the last 30 quarters).
+#' @param ... Unused.
+plot.qpm_decomposition <- function(x, var = NULL, drop_zero = TRUE,
+                                   periods = NULL, ...) {
   df <- as.data.frame(x)
   var <- var %||% df$variable[1]
   d <- df[df$variable == var, , drop = FALSE]
@@ -100,23 +108,29 @@ plot.qpm_decomposition <- function(x, var = NULL, drop_zero = TRUE, ...) {
     comps <- comps[vapply(comps, function(cc)
       max(abs(d$value[d$component == cc])) > 1e-9, TRUE)]
   comps <- c(comps, "initial")
-  n <- max(d$period_i)
+  n_all <- max(d$period_i)
+  keep <- periods %||% seq_len(n_all)
+  keep <- keep[keep >= 1 & keep <= n_all]
   M <- sapply(comps, function(cc) d$value[d$component == cc][order(d$period_i[d$component == cc])])
-  if (is.null(dim(M))) M <- matrix(M, nrow = n)
-  total <- attr(x, "states_dev")[, var]
+  if (is.null(dim(M))) M <- matrix(M, nrow = n_all)
+  M <- M[keep, , drop = FALSE]
+  total <- attr(x, "states_dev")[keep, var]
+  plabs <- d$period[match(keep, d$period_i)]
 
   cols <- c(qpm_palette(length(comps) - 1L), "grey72")
   ylim <- range(rowSums(M * (M > 0)), rowSums(M * (M < 0)), total)
   labels <- attr(x, "labels")
+  n <- length(keep)
 
   op <- graphics::par(mar = c(2.6, 2.8, 2.0, 0.6), mgp = c(1.6, 0.4, 0),
                       tcl = -0.25, cex.axis = 0.85)
   on.exit(graphics::par(op))
-  graphics::plot(NA, xlim = c(0.5, n + 0.5), ylim = ylim, xlab = "period",
-                 ylab = "deviation from steady state",
+  graphics::plot(NA, xlim = c(0.5, n + 0.5), ylim = ylim, xlab = "",
+                 ylab = "deviation from steady state", xaxt = "n",
                  main = sprintf("Decomposition of %s%s", var,
                                 if (nzchar(labels[var] %||% ""))
                                   sprintf(" (%s)", labels[var]) else ""))
+  period_axis(plabs)
   for (t in seq_len(n)) {
     ypos <- 0; yneg <- 0
     for (j in seq_along(comps)) {

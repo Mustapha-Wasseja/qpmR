@@ -18,6 +18,8 @@
 #'   are treated as observed.
 #' @param measurement_error Measurement-error standard deviation(s):
 #'   scalar or named vector over observables. Defaults to 0.
+#' @param kappa Diffuse-prior variance scale used when the model has
+#'   unit-root (random-walk) trends; see [state_space()].
 #' @return An object of class `qpm_filtration`: smoothed states in levels
 #'   (`$states`), their standard errors (`$se`), smoothed structural
 #'   shocks (`$shocks`), the log-likelihood (`$loglik`), innovation
@@ -32,7 +34,8 @@
 #' fit
 #' plot(fit, vars = c("y_gap", "r_bar"))
 #' @export
-qpm_filter <- function(x, data, observables = NULL, measurement_error = 0) {
+qpm_filter <- function(x, data, observables = NULL, measurement_error = 0,
+                       kappa = 1e6) {
   solution <- if (inherits(x, "qpm_model")) qpm_solve(x) else x
   stopifnot(inherits(solution, "qpm_solution"))
   if (!is.data.frame(data)) stop("data must be a data frame", call. = FALSE)
@@ -49,7 +52,8 @@ qpm_filter <- function(x, data, observables = NULL, measurement_error = 0) {
   if (is.null(observables) && length(ignored))
     message(sprintf("ignoring non-model columns: %s", paste(ignored, collapse = ", ")))
 
-  m <- state_space(solution, observables = obs, measurement_error = measurement_error)
+  m <- state_space(solution, observables = obs,
+                   measurement_error = measurement_error, kappa = kappa)
   Y <- as.matrix(data[, obs, drop = FALSE])
   storage.mode(Y) <- "double"
 
@@ -92,6 +96,7 @@ qpm_filter <- function(x, data, observables = NULL, measurement_error = 0) {
     diag = list(ljung_box = lb, outliers = outliers),
     observables = obs, period = period, data = data,
     n_missing = sum(is.na(Y)), n_obs = nrow(Y),
+    diffuse = m$diffuse, n_unit = m$n_unit,
     solution = solution
   ), class = "qpm_filtration")
 }
@@ -103,7 +108,10 @@ print.qpm_filtration <- function(x, ...) {
               x$period[1], x$period[x$n_obs], x$n_obs,
               paste(x$observables, collapse = ", "),
               x$n_missing, x$n_obs * length(x$observables)))
-  cat(sprintf("  log-likelihood: %.2f\n", x$loglik))
+  cat(sprintf("  log-likelihood: %.2f%s\n", x$loglik,
+              if (isTRUE(x$diffuse))
+                sprintf(" (approximate diffuse init, %d unit roots)", x$n_unit)
+              else ""))
   lb <- x$diag$ljung_box
   if (any(!is.na(lb))) {
     j <- which.min(lb)
@@ -151,9 +159,11 @@ plot.qpm_filtration <- function(x, vars = NULL, level = 0.9, ...) {
     lo <- est - z * se; hi <- est + z * se
     obs_pts <- if (v %in% x$observables) x$data[[v]] else NULL
     ylim <- range(lo, hi, obs_pts, na.rm = TRUE)
-    graphics::plot(NA, xlim = range(tt), ylim = ylim, xlab = "period", ylab = "",
+    graphics::plot(NA, xlim = range(tt), ylim = ylim, xlab = "", ylab = "",
+                   xaxt = "n",
                    main = if (nzchar(labels[v] %||% ""))
                      sprintf("%s (%s)", v, labels[v]) else v)
+    period_axis(x$period)
     graphics::polygon(c(tt, rev(tt)), c(lo, rev(hi)),
                       col = grDevices::adjustcolor(col_line, alpha.f = 0.18),
                       border = NA)
@@ -163,4 +173,12 @@ plot.qpm_filtration <- function(x, vars = NULL, level = 0.9, ...) {
     graphics::abline(h = x$solution$ss[v], lty = 3, col = "grey60")
   }
   invisible(x)
+}
+
+# axis with period labels at pretty positions (falls back to indices)
+period_axis <- function(period, side = 1) {
+  n <- length(period)
+  at <- unique(round(pretty(seq_len(n), n = 6)))
+  at <- at[at >= 1 & at <= n]
+  graphics::axis(side, at = at, labels = as.character(period)[at], cex.axis = 0.8)
 }

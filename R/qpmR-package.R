@@ -22,5 +22,5 @@ fmt_num <- function(x, digits = 3) formatC(x, digits = digits, format = "fg")
 
 # Bare shock names used non-standardly inside shocks() in shipped templates.
 utils::globalVariables(c("eps_y", "eps_pi", "eps_i", "eps_q", "eps_qbar",
-                         "eps_rbar", "eps_ystar", "eps_istar", "eps_pistar",
-                         "eps_prem", "eps_x", "e"))
+                         "eps_rbar", "eps_g", "eps_dy", "eps_ystar",
+                         "eps_istar", "eps_pistar", "eps_prem", "eps_x", "e"))

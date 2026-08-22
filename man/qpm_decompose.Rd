@@ -2,14 +2,28 @@
 % Please edit documentation in R/decompose.R
 \name{qpm_decompose}
 \alias{qpm_decompose}
+\alias{plot.qpm_decomposition}
 \title{Historical shock decomposition}
 \usage{
 qpm_decompose(fit, vars = NULL)
+
+\method{plot}{qpm_decomposition}(x, var = NULL, drop_zero = TRUE, periods = NULL, ...)
 }
 \arguments{
 \item{fit}{A \code{qpm_filtration} from \code{\link[=qpm_filter]{qpm_filter()}}.}
 
 \item{vars}{Variables to keep (default: all declared variables).}
+
+\item{x}{A \code{qpm_decomposition}.}
+
+\item{var}{Variable to plot.}
+
+\item{drop_zero}{Drop components that never contribute.}
+
+\item{periods}{Optional integer window of period indices to display
+(e.g. \code{81:110} for the last 30 quarters).}
+
+\item{...}{Unused.}
 }
 \value{
 A long data frame of class \code{qpm_decomposition} with columns

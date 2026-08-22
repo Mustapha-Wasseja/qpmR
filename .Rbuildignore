@@ -4,3 +4,4 @@
 ^\.gitignore$
 ^dev$
 ^\.github$
+^data-raw$

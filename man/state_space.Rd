@@ -4,7 +4,7 @@
 \alias{state_space}
 \title{State-space representation of a solved model}
 \usage{
-state_space(solution, observables = NULL, measurement_error = 0)
+state_space(solution, observables = NULL, measurement_error = 0, kappa = 1e+06)
 }
 \arguments{
 \item{solution}{A \code{qpm_solution}.}
@@ -14,10 +14,13 @@ the declared variables). Default: all declared variables.}
 
 \item{measurement_error}{Measurement-error standard deviation(s):
 a scalar recycled over observables, or a named vector.}
+
+\item{kappa}{Diffuse-prior variance scale for unit-root directions
+(only used when the model has unit roots).}
 }
 \value{
 A list with elements \code{T}, \code{R}, \code{Z}, \code{d}, \code{Qc}, \code{H}, \code{P1},
-\code{vars_all}, \code{observables}.
+\code{vars_all}, \code{observables}, \code{diffuse}, \code{n_unit}.
 }
 \description{
 Exposes the exact matrices qpmR itself uses for filtering, so other
@@ -27,6 +30,15 @@ representation (in deviations from steady state) is
 \deqn{y_t = Z a_t + d + u_t,   u_t ~ N(0, H)}
 with \code{d} the steady state of the observables and \code{P1} the stationary
 (Lyapunov) covariance used to initialize the filter.
+}
+\details{
+For stationary models \code{P1} is the exact stationary covariance. When
+the model has unit roots (random-walk trends), an approximate diffuse
+initialization is used: \code{P1} solves the Lyapunov equation for the
+slightly damped transition \code{sqrt(1 - 1/kappa) * T}, which reproduces
+the stationary covariance in stable directions and a variance of order
+\code{kappa} in unit-root directions, with the exact cross-coupling. Exact
+Durbin-Koopman diffuse recursions are on the roadmap.
 }
 \examples{
 sol <- qpm_solve(qpm_template("bkl"))

@@ -8,19 +8,30 @@
 #' with `d` the steady state of the observables and `P1` the stationary
 #' (Lyapunov) covariance used to initialize the filter.
 #'
+#' For stationary models `P1` is the exact stationary covariance. When
+#' the model has unit roots (random-walk trends), an approximate diffuse
+#' initialization is used: `P1` solves the Lyapunov equation for the
+#' slightly damped transition `sqrt(1 - 1/kappa) * T`, which reproduces
+#' the stationary covariance in stable directions and a variance of order
+#' `kappa` in unit-root directions, with the exact cross-coupling. Exact
+#' Durbin-Koopman diffuse recursions are on the roadmap.
+#'
 #' @param solution A `qpm_solution`.
 #' @param observables Character vector of observed variables (a subset of
 #'   the declared variables). Default: all declared variables.
 #' @param measurement_error Measurement-error standard deviation(s):
 #'   a scalar recycled over observables, or a named vector.
+#' @param kappa Diffuse-prior variance scale for unit-root directions
+#'   (only used when the model has unit roots).
 #' @return A list with elements `T`, `R`, `Z`, `d`, `Qc`, `H`, `P1`,
-#'   `vars_all`, `observables`.
+#'   `vars_all`, `observables`, `diffuse`, `n_unit`.
 #' @examples
 #' sol <- qpm_solve(qpm_template("bkl"))
 #' ss <- state_space(sol, observables = c("pi", "i", "q"))
 #' dim(ss$T); ss$d
 #' @export
-state_space <- function(solution, observables = NULL, measurement_error = 0) {
+state_space <- function(solution, observables = NULL, measurement_error = 0,
+                        kappa = 1e6) {
   stopifnot(inherits(solution, "qpm_solution"))
   observables <- observables %||% solution$vars
   bad <- setdiff(observables, solution$vars)
@@ -55,11 +66,20 @@ state_space <- function(solution, observables = NULL, measurement_error = 0) {
   dimnames(Qc) <- list(solution$shocks, solution$shocks)
   RQR <- solution$Q %*% Qc %*% t(solution$Q)
 
-  list(T = unname(solution$P), R = unname(solution$Q), Z = unname(Zc),
+  n_unit <- solution$counts$unit %||% 0L
+  Tm <- unname(solution$P)
+  P1 <- if (n_unit > 0L) {
+    solve_lyapunov(sqrt(1 - 1 / kappa) * Tm, RQR)   # approximate diffuse
+  } else {
+    solve_lyapunov(Tm, RQR)
+  }
+
+  list(T = Tm, R = unname(solution$Q), Z = unname(Zc),
        d = solution$ss[observables], Qc = Qc,
        H = diag(me^2, p, p),
-       P1 = solve_lyapunov(unname(solution$P), RQR),
-       vars_all = solution$vars_all, observables = observables)
+       P1 = P1,
+       vars_all = solution$vars_all, observables = observables,
+       diffuse = n_unit > 0L, n_unit = n_unit)
 }
 
 # Stationary covariance: V = T V T' + W, solved by vec(V) = (I - T (x) T)^-1 vec(W).

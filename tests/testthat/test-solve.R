@@ -36,8 +36,15 @@ test_that("explosive models are detected", {
   expect_error(qpm_solve(toy(x ~ 1.5 * x[-1] + e)), class = "qpm_bk_explosive")
 })
 
-test_that("unit roots are reported as singular steady state or BK failure", {
-  expect_error(qpm_solve(toy(x ~ x[-1] + e)), class = "qpm_error")
+test_that("pure random walks solve with a unit root", {
+  sol <- qpm_solve(toy(x ~ x[-1] + e))
+  expect_equal(unname(sol$P["x", "x"]), 1, tolerance = 1e-8)
+  expect_equal(sol$counts$unit, 1L)
+  expect_equal(unname(steady_state(sol)["x"]), 0)   # free level, min-norm
+})
+
+test_that("a drifted random walk has no steady state and says so", {
+  expect_error(qpm_solve(toy(x ~ x[-1] + 0.5 + e)), class = "qpm_no_steady_state")
 })
 
 test_that("deep lags work via auxiliaries", {

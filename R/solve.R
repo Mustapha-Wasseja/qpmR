@@ -39,6 +39,7 @@ qpm_solve <- function(model, tol = 1e-7) {
 
   structure(list(
     name = model$name, P = P, Q = Q, ss = ss,
+    ss_free = attr(ss, "n_free") %||% 0L,
     vars = model$vars$name, vars_all = sys$vars_all,
     aux = setdiff(sys$vars_all, model$vars$name),
     shocks = model$shocks, sigma = model$sigma,
@@ -145,23 +146,40 @@ build_first_order <- function(model) {
 }
 
 # -- steady state ------------------------------------------------------------
+# With unit-root (random-walk) trends the long-run matrix is singular: the
+# level of a pure trend is a free normalization. We return the minimum-norm
+# least-squares steady state (free levels normalized toward zero) and error
+# only when no fixed point exists at all (e.g. a drifted random walk).
 solve_steady_state <- function(sys) {
   M <- sys$A + sys$B + sys$C
+  N <- nrow(M)
   sv <- svd(M)
-  if (max(sv$d) < 1e-300 || min(sv$d) < 1e-10 * max(sv$d)) {
-    load <- abs(sv$v[, which.min(sv$d)])
-    culprits <- sys$vars_all[order(load, decreasing = TRUE)][seq_len(min(3, length(load)))]
+  tolr <- 1e-9 * max(sv$d, .Machine$double.xmin)
+  pos <- sv$d > tolr
+  x <- sv$v[, pos, drop = FALSE] %*%
+    ((t(sv$u[, pos, drop = FALSE]) %*% (-sys$const)) / sv$d[pos])
+  x <- as.numeric(x)
+  resid <- max(abs(M %*% x + sys$const))
+  if (resid > 1e-8 * (1 + max(abs(sys$const)))) {
+    load <- abs(sv$u[, which.min(sv$d)])
+    culprits <- sys$vars_all[order(load, decreasing = TRUE)][seq_len(min(3, N))]
     stop(errorCondition(sprintf(paste0(
-      "no unique steady state: the long-run system is singular ",
-      "(likely a unit root / random-walk process; qpmR 0.1 requires stationary models).\n",
-      "  variables most involved: %s"), paste(culprits, collapse = ", ")),
-      class = c("qpm_singular_steady_state", "qpm_error", "error", "condition")))
+      "no steady state exists: a unit-root process appears to have a nonzero ",
+      "drift (e.g. a random walk with drift), so the model has a growth path, ",
+      "not a fixed point. Balanced-growth steady states are not yet supported: ",
+      "set the drift to zero or detrend the data.\n",
+      "  equations most involved: near %s"), paste(culprits, collapse = ", ")),
+      class = c("qpm_no_steady_state", "qpm_error", "error", "condition")))
   }
-  as.numeric(solve(M, -sys$const))
+  attr(x, "n_free") <- N - sum(pos)
+  x
 }
 
 # -- Klein (2000) via ordered QZ --------------------------------------------
-solve_klein <- function(A, B, C, D) {
+# Roots inside the unit circle count as stable; roots within unit_tol of the
+# unit circle (random-walk trends) also count as stable, following the usual
+# qz-criterium convention, and are reported separately as unit roots.
+solve_klein <- function(A, B, C, D, unit_tol = 1e-6) {
   N <- nrow(A)
   Z0 <- matrix(0, N, N)
   Fm <- rbind(cbind(A, Z0), cbind(Z0, diag(N)))    # pencil: G z = lambda F z
@@ -170,7 +188,7 @@ solve_klein <- function(A, B, C, D) {
   gz <- QZ::qz(Gm, Fm)
   mod <- eig_modulus(gz$ALPHAR, gz$ALPHAI, gz$BETA)
 
-  sel <- as.integer(mod < 1)
+  sel <- as.integer(mod < 1 + unit_tol)
   # never split a complex conjugate pair (they share a 2x2 block)
   i <- 1L
   while (i < length(sel)) {
@@ -183,13 +201,15 @@ solve_klein <- function(A, B, C, D) {
   os <- QZ::qz.dtgsen(gz$S, gz$T, gz$Q, gz$Z, select = sel)
   mod_o <- eig_modulus(os$ALPHAR, os$ALPHAI, os$BETA)
   n_stable <- sum(sel)
+  n_unit <- sum(abs(mod[sel == 1L] - 1) < unit_tol)
 
   eigen_df <- data.frame(modulus = mod_o,
-                         stable = mod_o < 1,
+                         stable = mod_o < 1 + unit_tol,
+                         unit = abs(mod_o - 1) < unit_tol,
                          infinite = !is.finite(mod_o))
   eigen_df <- eigen_df[order(eigen_df$modulus), , drop = FALSE]
   rownames(eigen_df) <- NULL
-  counts <- list(stable = n_stable,
+  counts <- list(stable = n_stable, unit = n_unit,
                  unstable = sum(is.finite(mod)) - n_stable,
                  infinite = sum(!is.finite(mod)),
                  predetermined = N)
@@ -206,9 +226,8 @@ solve_klein <- function(A, B, C, D) {
     stop(errorCondition(sprintf(paste0(
       "Blanchard-Kahn failure: %d stable roots for %d predetermined states ",
       "(no stable solution - the system is explosive).\n",
-      "  Common causes: a near-unit or explosive backward root, or an exact ",
-      "unit root from pure UIP / random-walk trends (use a dampened/hybrid ",
-      "specification in qpmR 0.1)."), n_stable, N),
+      "  A backward-looking root exceeds one: check autoregressive ",
+      "coefficients and persistence sums in the calibration."), n_stable, N),
       class = c("qpm_bk_explosive", "qpm_bk", "qpm_error", "error", "condition")))
 
   Z <- os$Z
@@ -271,15 +290,18 @@ print.qpm_solution <- function(x, ...) {
   ct <- x$counts
   cat(sprintf("  Blanchard-Kahn: %d stable roots = %d predetermined states -> unique stable solution\n",
               ct$stable, ct$predetermined))
-  fin <- x$eigen$modulus[is.finite(x$eigen$modulus)]
+  fin <- x$eigen$modulus[is.finite(x$eigen$modulus) & !x$eigen$unit]
   st <- fin[fin < 1]; un <- fin[fin >= 1]
-  cat(sprintf("  roots: largest stable %.3f%s%s\n",
+  cat(sprintf("  roots: largest stable %.3f%s%s%s\n",
               max(st),
+              if (ct$unit %||% 0) sprintf(", %d unit (random-walk trends -> diffuse filtering)", ct$unit) else "",
               if (length(un)) sprintf(", smallest unstable %.3f", min(un)) else "",
               if (ct$infinite) sprintf(", %d infinite", ct$infinite) else ""))
   ssv <- steady_state(x)
   ps <- paste(names(ssv), "=", fmt_num(round(ssv, 6)), collapse = ", ")
-  cat("  steady state:\n")
+  cat(if ((x$ss_free %||% 0) > 0)
+        "  steady state (free trend levels normalized to minimum norm):\n"
+      else "  steady state:\n")
   cat(strwrap(ps, width = 76, indent = 4, exdent = 4), sep = "\n")
   invisible(x)
 }

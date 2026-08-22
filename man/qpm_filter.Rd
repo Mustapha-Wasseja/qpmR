@@ -4,7 +4,7 @@
 \alias{qpm_filter}
 \title{Estimate latent states from data (Kalman filter/smoother)}
 \usage{
-qpm_filter(x, data, observables = NULL, measurement_error = 0)
+qpm_filter(x, data, observables = NULL, measurement_error = 0, kappa = 1e+06)
 }
 \arguments{
 \item{x}{A \code{qpm_model} (solved internally) or \code{qpm_solution}.}
@@ -18,6 +18,9 @@ are treated as observed.}
 
 \item{measurement_error}{Measurement-error standard deviation(s):
 scalar or named vector over observables. Defaults to 0.}
+
+\item{kappa}{Diffuse-prior variance scale used when the model has
+unit-root (random-walk) trends; see \code{\link[=state_space]{state_space()}}.}
 }
 \value{
 An object of class \code{qpm_filtration}: smoothed states in levels

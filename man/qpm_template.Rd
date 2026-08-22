@@ -4,10 +4,12 @@
 \alias{qpm_template}
 \title{Shipped model templates}
 \usage{
-qpm_template(name = c("bkl"))
+qpm_template(name = c("bkl"), trends = c("stationary", "rw"))
 }
 \arguments{
 \item{name}{Template name; currently \code{"bkl"}.}
+
+\item{trends}{\code{"stationary"} or \code{"rw"}; see Details.}
 }
 \value{
 A calibrated \code{qpm_model}.
@@ -15,23 +17,41 @@ A calibrated \code{qpm_model}.
 \description{
 \code{"bkl"} is the canonical semi-structural small-open-economy quarterly
 projection model in the tradition of Berg, Karam and Laxton (2006, IMF
-WP/06/81): an IS curve, a hybrid Phillips curve, a forward-looking
+WP/06/80-81): an IS curve, a hybrid Phillips curve, a forward-looking
 inflation-targeting policy rule, and a dampened (hybrid) UIP block,
-plus stationary AR(1) processes for equilibrium trends and foreign
-variables. The default calibration is illustrative, for a
-higher-inflation emerging economy ("Meridia": 5 percent inflation
-target, positive risk premium); it is not any actual country.
+plus equilibrium-trend and foreign processes, and an observation block
+for real GDP growth (\code{dy_obs = dy_bar + 4 * (y_gap - y_gap[-1])}), so
+the model can be filtered on actual national-accounts data without
+modelling the level of potential output. The default calibration is
+illustrative, for a higher-inflation emerging economy ("Meridia"); it
+is not any actual country. See \link{czechia} for a real dataset and a
+matching recalibration example.
 }
 \details{
+\code{trends} selects the equilibrium processes:
+\itemize{
+\item \code{"stationary"} (default): AR(1) trends anchored at steady-state
+parameters; the model is fully stationary.
+\item \code{"rw"}: driftless random walks for the equilibrium real exchange
+rate and potential growth (whose levels are pure normalizations);
+the neutral rate stays anchored by real interest parity
+(\code{rstar + prem}), since a free random walk there would leave
+steady-state gaps indeterminate. The model then has unit roots:
+free trend levels are normalized to minimum norm in the steady
+state, and \code{\link[=qpm_filter]{qpm_filter()}} switches to diffuse initialization
+automatically. This is the configuration for real data, where
+trends drift.
+}
+
 Conventions: gaps in percentage points; inflation QoQ annualised;
 interest rates in percent per annum; \code{q} is 100 times the log real
-exchange rate, an increase is a real depreciation. The 0.1 template is
-fully stationary (dampened UIP, AR(1) trends); random-walk trends
-arrive with the Kalman filter in 0.2.
+exchange rate, an increase is a real depreciation; \code{dy_obs} is QoQ
+annualised real GDP growth.
 }
 \examples{
 m <- qpm_template("bkl")
 summary(m)
+m_rw <- qpm_template("bkl", trends = "rw")
 }
 \references{
 Berg, A., Karam, P., and Laxton, D. (2006). A Practical
