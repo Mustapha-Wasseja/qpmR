@@ -3,7 +3,17 @@
 
 is_quarter_label <- function(x) grepl("^[0-9]{4}-Q[1-4]$", x)
 
+#' Generate consecutive quarter labels
+#'
+#' @param last The starting quarter, `"YYYY-Qq"` style; the sequence
+#'   begins at the following quarter.
+#' @param H Number of quarters to generate.
+#' @return Character vector of `H` quarter labels.
+#' @examples
+#' next_quarters("2026-Q3", 4)
+#' @export
 next_quarters <- function(last, H) {
+  stopifnot(length(last) == 1L, is_quarter_label(last))
   yr <- as.integer(substr(last, 1, 4))
   qt <- as.integer(substr(last, 7, 7))
   idx <- (yr * 4L + (qt - 1L)) + seq_len(H)

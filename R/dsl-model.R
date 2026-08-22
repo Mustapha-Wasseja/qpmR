@@ -49,6 +49,10 @@ qpm_model <- function(name = "QPM model", variables, shocks, equations,
     stop(sprintf("model has %d equations but %d variables; these must match",
                  length(equations), length(varnames)), call. = FALSE)
 
+  # formulas are kept for display only; drop their environments so that
+  # serialized models (forecast rounds) stay small and self-contained
+  equations <- lapply(equations, function(f) { environment(f) <- baseenv(); f })
+
   labels <- vapply(seq_along(equations), function(i)
     sprintf("%d (%s)", i, deparse1(equations[[i]][[2L]])), character(1))
   parsed <- Map(parse_qpm_equation, equations, eq_label = labels,

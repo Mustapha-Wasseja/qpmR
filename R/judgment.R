@@ -13,7 +13,7 @@
 #' replayable; the full set of conditions and judgment is re-solved
 #' jointly each time. Inspect the ledger with [judgment_log()].
 #'
-#' @param fc A `qpm_forecast`.
+#' @param fc A `qpm_forecast` or a `qpm_round`.
 #' @param ... Named adjustments: one argument per variable, each a named
 #'   vector of *additions* (percentage points, relative to the current
 #'   forecast) by period, e.g. `pi = c("2027-Q1" = 0.4)`.
@@ -36,6 +36,13 @@
 #' @export
 add_judgment <- function(fc, ..., author = "desk", rationale = "",
                          anticipated = NULL, instruments = NULL) {
+  if (inherits(fc, "qpm_round")) {
+    fc$forecast <- add_judgment(fc$forecast, ..., author = author,
+                                rationale = rationale,
+                                anticipated = anticipated,
+                                instruments = instruments)
+    return(fc)
+  }
   stopifnot(inherits(fc, "qpm_forecast"))
   sol <- fc$solution
   if (is.null(sol))
@@ -91,6 +98,7 @@ add_judgment <- function(fc, ..., author = "desk", rationale = "",
 #' judgment_log(fc)
 #' @export
 judgment_log <- function(fc) {
+  if (inherits(fc, "qpm_round")) fc <- fc$forecast
   stopifnot(inherits(fc, "qpm_forecast"))
   j <- fc$judgment
   if (is.null(j) || nrow(j) == 0L) {

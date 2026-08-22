@@ -14,7 +14,7 @@ add_judgment(
 )
 }
 \arguments{
-\item{fc}{A \code{qpm_forecast}.}
+\item{fc}{A \code{qpm_forecast} or a \code{qpm_round}.}
 
 \item{...}{Named adjustments: one argument per variable, each a named
 vector of \emph{additions} (percentage points, relative to the current

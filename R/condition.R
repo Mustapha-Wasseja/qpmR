@@ -148,7 +148,8 @@ recondition <- function(fc, anticipated, instruments) {
 #' Rubio-Ramirez (2021) for the full treatment, which is on the qpmR
 #' roadmap.
 #'
-#' @param fc A `qpm_forecast` from [qpm_forecast()].
+#' @param fc A `qpm_forecast` from [qpm_forecast()], or a `qpm_round`
+#'   (its forecast is conditioned and the round returned).
 #' @param ... Named conditions: one argument per variable, each a named
 #'   vector of levels by period, e.g.
 #'   `i = c("2026-Q4" = 3.5, "2027-Q1" = 3.5)` or `pi4 = c(h4 = 2)`.
@@ -168,6 +169,11 @@ recondition <- function(fc, anticipated, instruments) {
 #' hold
 #' @export
 qpm_condition <- function(fc, ..., anticipated = FALSE, instruments = NULL) {
+  if (inherits(fc, "qpm_round")) {
+    fc$forecast <- qpm_condition(fc$forecast, ..., anticipated = anticipated,
+                                 instruments = instruments)
+    return(fc)
+  }
   stopifnot(inherits(fc, "qpm_forecast"))
   sol <- fc$solution
   spec <- list(...)
@@ -215,6 +221,11 @@ qpm_condition <- function(fc, ..., anticipated = FALSE, instruments = NULL) {
 #'                     label = "10pct depreciation")
 #' @export
 qpm_scenario <- function(fc, shocks, anticipated = FALSE, label = NULL) {
+  if (inherits(fc, "qpm_round")) {
+    fc$forecast <- qpm_scenario(fc$forecast, shocks, anticipated = anticipated,
+                                label = label)
+    return(fc)
+  }
   stopifnot(inherits(fc, "qpm_forecast"), is.list(shocks))
   sol <- fc$solution
   if (is.null(sol))

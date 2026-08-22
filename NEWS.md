@@ -1,6 +1,31 @@
-# qpmR (development version)
+# qpmR 0.3.0
 
-The start of the 0.3 policy-analysis layer.
+The policy-analysis layer is complete.
+
+## Forecast rounds and revision decomposition
+
+* `qpm_round()`: one replayable artifact per forecast -- model,
+  calibration, data vintage, filtration, and the conditioned forecast
+  together. [qpm_condition()], `qpm_scenario()`, and `add_judgment()`
+  apply to rounds directly.
+* `save_round()` / `load_round()` / `list_rounds()`: a plain-directory
+  round store; each round is a self-contained `round.rds` plus
+  human-readable CSV sidecars (forecast, data, calibration, judgment)
+  for auditing without R.
+* `compare_rounds()`: the revision decomposition. The forecast revision
+  between two rounds is split into parameters, data revisions, new data
+  (outturns), conditions, and judgment by re-running the full pipeline
+  swapping one ingredient at a time. Contributions telescope (they sum
+  to the total exactly); the endpoints are verified against the
+  archived rounds, so a version drift is reported rather than silently
+  absorbed. Judgment overtaken by data (a conditioned quarter that has
+  become an outturn) is dropped and reported. Waterfall printing and
+  stacked revision charts.
+* `next_quarters()` exported for quarter-label arithmetic; formulas in
+  models are stored without environments, keeping serialized rounds
+  small.
+
+## Conditional forecasts, scenarios, judgment
 
 * `qpm_condition()`: hard conditional forecasts. Impose paths on any
   variables at any horizons; qpmR backs out the minimum-norm structural

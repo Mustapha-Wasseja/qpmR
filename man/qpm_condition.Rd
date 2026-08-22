@@ -7,7 +7,8 @@
 qpm_condition(fc, ..., anticipated = FALSE, instruments = NULL)
 }
 \arguments{
-\item{fc}{A \code{qpm_forecast} from \code{\link[=qpm_forecast]{qpm_forecast()}}.}
+\item{fc}{A \code{qpm_forecast} from \code{\link[=qpm_forecast]{qpm_forecast()}}, or a \code{qpm_round}
+(its forecast is conditioned and the round returned).}
 
 \item{...}{Named conditions: one argument per variable, each a named
 vector of levels by period, e.g.
