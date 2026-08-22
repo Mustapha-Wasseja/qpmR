@@ -54,47 +54,12 @@ qpm_estimate <- function(model, data, priors, observables = NULL,
     stop("priors must come from priors()", call. = FALSE)
   if (!is.null(seed)) set.seed(seed)
 
-  nm <- names(priors)
-  is_par <- nm %in% names(model$params)
-  is_shk <- nm %in% model$shocks
-  bad <- nm[!(is_par | is_shk)]
-  if (length(bad))
-    stop(sprintf("priors refer to unknown parameters/shocks: %s",
-                 paste(bad, collapse = ", ")), call. = FALSE)
-
-  # data plumbing (mirrors qpm_filter)
-  candidates <- setdiff(names(data), "period")
-  obs <- observables %||% intersect(candidates, model$vars$name)
-  if (length(obs) == 0L) stop("no data columns match declared model variables", call. = FALSE)
-  Y <- as.matrix(data[, obs, drop = FALSE]); storage.mode(Y) <- "double"
-
-  set_theta <- function(theta) {
-    m2 <- model
-    if (any(is_par)) m2$params[nm[is_par]] <- theta[is_par]
-    if (any(is_shk)) m2$sigma[nm[is_shk]] <- theta[is_shk]
-    m2
-  }
-  loglik_at <- function(theta) {
-    m2 <- set_theta(theta)
-    sol <- qpm_solve(m2)
-    ssm <- state_space(sol, observables = obs,
-                       measurement_error = measurement_error, kappa = kappa)
-    kalman_loglik(ssm, Y)
-  }
-  logprior_at <- function(theta) {
-    if (method == "mle") return(0)
-    sum(vapply(seq_along(nm), function(j) priors[[j]]$logd(theta[j]), numeric(1)))
-  }
-  logpost_nat <- function(theta) {
-    lp <- logprior_at(theta)
-    if (!is.finite(lp)) return(-Inf)
-    ll <- tryCatch(loglik_at(theta), error = function(cnd) -Inf)
-    if (!is.finite(ll)) return(-Inf)
-    ll + lp
-  }
-  to_u <- function(theta) vapply(seq_along(nm), function(j) tr_fwd(theta[j], priors[[j]]), numeric(1))
-  to_nat <- function(u) vapply(seq_along(nm), function(j) tr_inv(u[j], priors[[j]]), numeric(1))
-  logjac <- function(u) sum(vapply(seq_along(nm), function(j) tr_logjac(u[j], priors[[j]]), numeric(1)))
+  ob <- estimation_objective(model, data, priors, observables,
+                             measurement_error, kappa, method)
+  nm <- ob$nm; obs <- ob$obs
+  logpost_nat <- ob$logpost_nat
+  to_u <- ob$to_u; to_nat <- ob$to_nat; logjac <- ob$logjac
+  is_par <- ob$is_par; is_shk <- ob$is_shk
 
   # starting point: current calibration if inside support, else prior mean
   theta0 <- vapply(seq_along(nm), function(j) {
@@ -210,6 +175,55 @@ qpm_estimate <- function(model, data, priors, observables = NULL,
     model = model, data = data, observables = obs,
     measurement_error = measurement_error, kappa = kappa
   ), class = "qpm_estimate")
+}
+
+# Build the estimation objective (shared by qpm_estimate and
+# marginal_likelihood): the natural-space log posterior, transforms to and
+# from unconstrained space, and the change-of-variables Jacobian.
+estimation_objective <- function(model, data, priors, observables,
+                                 measurement_error, kappa, method) {
+  nm <- names(priors)
+  is_par <- nm %in% names(model$params)
+  is_shk <- nm %in% model$shocks
+  bad <- nm[!(is_par | is_shk)]
+  if (length(bad))
+    stop(sprintf("priors refer to unknown parameters/shocks: %s",
+                 paste(bad, collapse = ", ")), call. = FALSE)
+
+  candidates <- setdiff(names(data), "period")
+  obs <- observables %||% intersect(candidates, model$vars$name)
+  if (length(obs) == 0L)
+    stop("no data columns match declared model variables", call. = FALSE)
+  Y <- as.matrix(data[, obs, drop = FALSE]); storage.mode(Y) <- "double"
+
+  loglik_at <- function(theta) {
+    m2 <- model
+    if (any(is_par)) m2$params[nm[is_par]] <- theta[is_par]
+    if (any(is_shk)) m2$sigma[nm[is_shk]] <- theta[is_shk]
+    sol <- qpm_solve(m2)
+    ssm <- state_space(sol, observables = obs,
+                       measurement_error = measurement_error, kappa = kappa)
+    kalman_loglik(ssm, Y)
+  }
+  logprior_at <- function(theta) {
+    if (method == "mle") return(0)
+    sum(vapply(seq_along(nm), function(j) priors[[j]]$logd(theta[j]), numeric(1)))
+  }
+  logpost_nat <- function(theta) {
+    lp <- logprior_at(theta)
+    if (!is.finite(lp)) return(-Inf)
+    ll <- tryCatch(loglik_at(theta), error = function(cnd) -Inf)
+    if (!is.finite(ll)) return(-Inf)
+    ll + lp
+  }
+  list(nm = nm, obs = obs, is_par = is_par, is_shk = is_shk,
+       logpost_nat = logpost_nat,
+       to_u = function(theta) vapply(seq_along(nm), function(j)
+         tr_fwd(theta[j], priors[[j]]), numeric(1)),
+       to_nat = function(u) vapply(seq_along(nm), function(j)
+         tr_inv(u[j], priors[[j]]), numeric(1)),
+       logjac = function(u) sum(vapply(seq_along(nm), function(j)
+         tr_logjac(u[j], priors[[j]]), numeric(1))))
 }
 
 split_rhat <- function(x, chain) {

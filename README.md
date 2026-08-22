@@ -120,7 +120,7 @@ rB <- add_judgment(qpm_round("2026-Q3 September", mcz, cz, horizon = 12),
 compare_rounds(rA, rB)
 ```
 
-And in the development version (the start of 0.4 — estimation):
+And since 0.4 — the estimation layer:
 
 - **`priors()`** — a prior mini-language (`beta`, `gamma`, `invgamma`,
   `normal`, `uniform`, `truncate`) in the mean/sd parametrization
@@ -133,6 +133,11 @@ And in the development version (the start of 0.4 — estimation):
   posterior to prior spread. `method = "mle"` uses the same machinery.
 - **`posterior_forecast()`** — fan charts that integrate over the
   posterior: every draw re-solves the model and re-filters the data.
+- **`qpm_identify()`** — Iskrev-style identification diagnostics
+  *before* sampling: which parameters have no effect, which are only
+  jointly identified, where the Jacobian loses rank.
+- **`marginal_likelihood()`** — modified harmonic mean with a Laplace
+  cross-check; differences across models are log Bayes factors.
 
 ```r
 est <- qpm_estimate(mcz, cz, priors(
@@ -175,7 +180,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
 | 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
 | 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
-| 0.4 | Bayesian estimation — **in progress** (`priors()`, `qpm_estimate()` with adaptive RWM and R-hat/ESS, `posterior_forecast()` shipped in the dev version; next: formal identification diagnostics, estimation vignette, marginal likelihood) |
+| 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette — done |
 | 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |
 
 ## Design commitments

@@ -180,6 +180,8 @@ without R.
 
 ## Where this is going
 
-0.4 adds Bayesian estimation (priors, posterior sampling on the filter
-likelihood, posterior fans); 1.0 the full FPAS workflow with Quarto
-report templates. See the README roadmap.
+Estimation — priors, posterior sampling on the filter likelihood,
+identification diagnostics, marginal likelihoods, and posterior fan
+charts — is covered in `vignette("qpmR-estimation")`. Next on the
+roadmap: the full FPAS reporting workflow (Quarto report templates,
+chart packs). See the README.

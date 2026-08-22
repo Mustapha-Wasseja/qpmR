@@ -56,12 +56,15 @@ dist_constructors <- function() {
       lo <- max(d$lower, lower); up <- min(d$upper, upper)
       if (up <= lo) stop("truncate(): empty support", call. = FALSE)
       parent_logd <- d$logd
-      # unnormalized within the truncated support: the normalizing constant
-      # is parameter-free, so modes and MCMC are unaffected
-      out <- make_dist(paste0("trunc-", d$dist), d$mean, d$sd, lo, up,
-                       function(x) ifelse(x < lo | x > up, -Inf, parent_logd(x)),
-                       d$par)
-      out
+      # renormalize numerically so truncated priors integrate to one --
+      # this matters for marginal likelihoods (harmless for MCMC/modes)
+      cst <- tryCatch(stats::integrate(function(x) exp(parent_logd(x)),
+                                       lo, up, rel.tol = 1e-9)$value,
+                      error = function(cnd) NA_real_)
+      lc <- if (is.finite(cst) && cst > 0) log(cst) else 0
+      make_dist(paste0("trunc-", d$dist), d$mean, d$sd, lo, up,
+                function(x) ifelse(x < lo | x > up, -Inf, parent_logd(x) - lc),
+                d$par)
     }
   )
 }

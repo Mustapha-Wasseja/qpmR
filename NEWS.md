@@ -1,6 +1,27 @@
-# qpmR (development version)
+# qpmR 0.4.0
 
-The start of the 0.4 estimation layer.
+The estimation layer is complete.
+
+## Identification, marginal likelihood, vignette
+
+* `qpm_identify()`: Iskrev-style local identification diagnostics
+  before any sampling — numerical Jacobians of the solved model
+  (solution level) and of the observables' population moments (moment
+  level, stationary models) with respect to the chosen parameters.
+  Reports parameters with no effect, rank-deficient combinations, and
+  near-collinear pairs that are only jointly identified. Unit-root
+  models get the solution-level check with an explanatory note.
+* `marginal_likelihood()`: log marginal likelihood by the modified
+  harmonic mean (Geweke 1999) across truncation probabilities with a
+  stability spread, plus a Laplace approximation at the mode in
+  transformed space as a cross-check. Differences across models on the
+  same data are log Bayes factors. `truncate()` priors are now
+  renormalized numerically at construction so they contribute proper
+  densities.
+* New vignette `qpmR-estimation`: priors, the AR(1) estimation
+  laboratory, identification, Bayes factors, and the full Czech
+  estimation with its results discussed (including the honestly
+  weakly-identified policy-response coefficient).
 
 * `priors()`: the prior mini-language. `normal()`, `beta()`, `gamma()`,
   `invgamma()`, `uniform()`, and `truncate()` exist only inside
