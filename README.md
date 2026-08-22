@@ -80,6 +80,33 @@ plot(fit, vars = c("y_gap", "dy_bar", "r_bar", "q_gap"))
 plot(qpm_decompose(fit), var = "pi4")
 ```
 
+And in the development version (the start of 0.3 — policy analysis):
+
+- **`qpm_condition()`** — hard conditional forecasts with the
+  minimum-norm implied shocks reported in standard deviations, an
+  explicit `anticipated` switch (announced-at-start vs
+  period-by-period surprises — materially different in any
+  forward-looking model), instrument restrictions, and conditional fan
+  bands that collapse at conditioned points. The anticipation
+  recursion is verified against brute-force perfect foresight in the
+  test suite.
+- **`qpm_scenario()`** — shock-based alternatives, announced or
+  surprise.
+- **`add_judgment()` / `judgment_log()`** — judgment as a first-class,
+  logged operation: state the change, qpmR back-solves the supporting
+  shocks, records author/time/rationale, and flags anything requiring
+  more than two standard deviations.
+
+```r
+base <- qpm_forecast(qpm_solve(mcz), from = fit, horizon = 12)
+hold <- qpm_condition(base, i = c("2026-Q3" = 3.5, "2026-Q4" = 3.5),
+                      anticipated = TRUE, instruments = "eps_i")
+judged <- add_judgment(base, pi4 = c("2027-Q1" = 0.4),
+                       author = "prices desk",
+                       rationale = "announced energy-tariff increase")
+judgment_log(judged)
+```
+
 ## Quickstart
 
 ```r
@@ -109,7 +136,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 |---|---|
 | 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
 | 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
-| 0.3 | Conditional forecasts (`qpm_condition()`, anticipated vs unanticipated), judgment ledger (`add_judgment()`), forecast rounds |
+| 0.3 | Conditional forecasts, judgment ledger — **in progress** (`qpm_condition()`, `qpm_scenario()`, `add_judgment()`, `judgment_log()` shipped in the dev version; next: forecast rounds, round store, revision decomposition) |
 | 0.4 | Bayesian estimation, identification diagnostics, posterior fans |
 | 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |
 

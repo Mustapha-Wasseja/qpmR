@@ -2,7 +2,7 @@
 % Please edit documentation in R/forecast.R
 \name{qpm_forecast}
 \alias{qpm_forecast}
-\title{Unconditional model forecast with uncertainty bands}
+\title{Model forecast with uncertainty bands}
 \usage{
 qpm_forecast(
   object,
@@ -29,18 +29,17 @@ vector over \code{object$vars_all}, or \code{NULL} (steady state).}
 \value{
 An object of class \code{qpm_forecast}: a list with \code{paths} (long
 data frame: \code{variable}, \code{h}, \code{mean}, and \verb{lo_*}/\verb{hi_*} per band, in
-levels), plus attributes for plotting.
+levels), forecast-period labels in \verb{$periods}, plus the machinery
+needed for conditioning.
 }
 \description{
 Iterates the solved model forward from an initial state and computes
 analytic forecast uncertainty from the shock variances,
 \deqn{V_h = P V_{h-1} P' + Q S Q'}
-giving Gaussian fan bands around the mean path.
-}
-\details{
-Conditional forecasts, judgment, and filtered initial states are the
-subject of qpmR 0.2/0.3; in 0.1 the initial state comes from a
-simulation (or is the steady state).
+giving Gaussian fan bands around the mean path. The result can then be
+conditioned on assumed paths with \code{\link[=qpm_condition]{qpm_condition()}}, shifted by shock
+scenarios with \code{\link[=qpm_scenario]{qpm_scenario()}}, or adjusted with logged judgment via
+\code{\link[=add_judgment]{add_judgment()}}.
 }
 \examples{
 sol <- qpm_solve(qpm_template("bkl"))

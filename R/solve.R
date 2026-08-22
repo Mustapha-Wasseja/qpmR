@@ -46,6 +46,7 @@ qpm_solve <- function(model, tol = 1e-7) {
     eigen = kl$eigen, counts = kl$counts,
     labels = stats::setNames(model$vars$label, model$vars$name),
     units = stats::setNames(model$vars$unit, model$vars$name),
+    structural = list(A = sys$A, B = sys$B, C = sys$C, D = sys$D),
     model = model, residual = resid
   ), class = "qpm_solution")
 }

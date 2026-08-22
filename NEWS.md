@@ -1,3 +1,34 @@
+# qpmR (development version)
+
+The start of the 0.3 policy-analysis layer.
+
+* `qpm_condition()`: hard conditional forecasts. Impose paths on any
+  variables at any horizons; qpmR backs out the minimum-norm structural
+  shocks (in standard-deviation units, optionally restricted to
+  `instruments`) that deliver them. The `anticipated` switch is
+  explicit: `TRUE` means the conditioned path is announced at the start
+  of the forecast and expectations react ahead of it, `FALSE` means
+  period-by-period surprises. Anticipated propagation uses the exact
+  news recursion `F_j = N^j Q`, `N = -(AP+B)^{-1} A`, verified in the
+  tests against a brute-force perfect-foresight solve. Fan bands are
+  recomputed as the Gaussian conditional distribution given the
+  conditions (zero width at conditioned points). Announced rate holds
+  reproduce the Laseen-Svensson (2011) anticipated-path reversal, as
+  they should.
+* `qpm_scenario()`: shock-based alternative scenarios (announced or
+  surprise), additive on any forecast.
+* `add_judgment()` / `judgment_log()`: the judgment ledger. State the
+  adjustment in percentage points; qpmR back-solves the supporting
+  shocks, keeps the forecast model-consistent, records author,
+  timestamp and rationale, and flags judgment requiring shocks above
+  two standard deviations. Entries are stored as absolute targets and
+  the full condition/judgment set is re-solved jointly, so the ledger
+  is replayable.
+* Forecasts carry quarter labels (`2026-Q3` style) inherited from the
+  filtration; conditions and judgment can be addressed by label or by
+  horizon (`h3`). Conditioned and judgment points are marked on fan
+  charts.
+
 # qpmR 0.2.0
 
 The filtration layer is complete.
