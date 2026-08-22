@@ -172,3 +172,36 @@ kalman_smooth <- function(m, Y) {
        shocks = ehat,
        innov = v_mat, innov_std = vstd_mat)
 }
+
+# Likelihood-only Kalman filter (no storage, no smoother) for estimation.
+kalman_loglik <- function(m, Y) {
+  n <- nrow(Y); N <- nrow(m$T)
+  Tt <- m$T; RQR <- m$R %*% m$Qc %*% t(m$R)
+  a_f <- rep(0, N); P_f <- m$P1
+  loglik <- 0
+  for (t in seq_len(n)) {
+    ap <- as.numeric(Tt %*% a_f)
+    Pp <- Tt %*% P_f %*% t(Tt) + RQR
+    Pp <- (Pp + t(Pp)) / 2
+    idx <- which(!is.na(Y[t, ]))
+    if (length(idx) == 0L) { a_f <- ap; P_f <- Pp; next }
+    Zt <- m$Z[idx, , drop = FALSE]
+    Ht <- m$H[idx, idx, drop = FALSE]
+    v <- as.numeric(Y[t, idx] - Zt %*% ap - m$d[idx])
+    Fm <- Zt %*% Pp %*% t(Zt) + Ht
+    Fm <- (Fm + t(Fm)) / 2
+    ch <- tryCatch(chol(Fm), error = function(cnd) NULL)
+    if (is.null(ch) || min(diag(ch)) < 1e-8 * max(diag(ch)))
+      stop(errorCondition(sprintf("innovation covariance is singular at period %d", t),
+        class = c("qpm_singular_F", "qpm_error", "error", "condition")))
+    Finv_v <- backsolve(ch, forwardsolve(t(ch), v))
+    K <- Pp %*% t(Zt) %*% chol2inv(ch)
+    a_f <- ap + as.numeric(K %*% v)
+    IKZ <- diag(N) - K %*% Zt
+    P_f <- IKZ %*% Pp %*% t(IKZ) + K %*% Ht %*% t(K)
+    P_f <- (P_f + t(P_f)) / 2
+    loglik <- loglik - 0.5 * (length(idx) * log(2 * pi) +
+                                2 * sum(log(diag(ch))) + sum(v * Finv_v))
+  }
+  loglik
+}

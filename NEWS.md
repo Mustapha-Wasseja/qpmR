@@ -1,3 +1,32 @@
+# qpmR (development version)
+
+The start of the 0.4 estimation layer.
+
+* `priors()`: the prior mini-language. `normal()`, `beta()`, `gamma()`,
+  `invgamma()`, `uniform()`, and `truncate()` exist only inside
+  `priors()` (evaluated in a controlled environment), so base R's
+  `beta()` and `gamma()` functions are never masked. Beta/gamma/
+  inverse-gamma use the mean/sd parametrization economists write down.
+* `qpm_estimate()`: Bayesian estimation of any subset of structural
+  parameters and shock standard deviations over the Kalman-filter
+  likelihood. Posterior mode in transformed (unconstrained) space,
+  BFGS Hessian as the proposal seed, adaptive random-walk Metropolis
+  (Haario-style covariance adaptation during burn-in, acceptance
+  targeted at 0.25), multiple sequential chains, split R-hat and
+  Geyer effective sample sizes. Draws violating Blanchard-Kahn get
+  zero weight (the usual determinacy truncation). `method = "mle"`
+  reuses the machinery with flat priors on the declared supports.
+* Printing reports mode, posterior mean, 90% interval, R-hat, ESS,
+  and a "learned" column comparing posterior to prior spread -- a
+  cheap identification diagnostic. `plot()` overlays prior and
+  posterior densities. `coef()` extracts point estimates;
+  `apply_estimate()` recalibrates the model at them.
+* `posterior_forecast()`: fan charts integrating over the posterior --
+  each draw re-solves the model and re-filters the data, so the bands
+  combine future-shock and parameter uncertainty.
+* Internal: `kalman_loglik()`, a storage-free filter pass for
+  estimation speed.
+
 # qpmR 0.3.0
 
 The policy-analysis layer is complete.

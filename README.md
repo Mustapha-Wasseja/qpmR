@@ -120,6 +120,31 @@ rB <- add_judgment(qpm_round("2026-Q3 September", mcz, cz, horizon = 12),
 compare_rounds(rA, rB)
 ```
 
+And in the development version (the start of 0.4 — estimation):
+
+- **`priors()`** — a prior mini-language (`beta`, `gamma`, `invgamma`,
+  `normal`, `uniform`, `truncate`) in the mean/sd parametrization
+  economists write down, scoped inside `priors()` so base R's `beta()`
+  and `gamma()` are never masked.
+- **`qpm_estimate()`** — Bayesian estimation of any subset of
+  parameters and shock sds over the Kalman-filter likelihood: posterior
+  mode, adaptive random-walk Metropolis seeded by the BFGS Hessian,
+  split R-hat / ESS diagnostics, and a "learned" column comparing
+  posterior to prior spread. `method = "mle"` uses the same machinery.
+- **`posterior_forecast()`** — fan charts that integrate over the
+  posterior: every draw re-solves the model and re-filters the data.
+
+```r
+est <- qpm_estimate(mcz, cz, priors(
+  b1 = beta(0.70, 0.10), b2 = gamma(0.25, 0.10), b3 = gamma(0.10, 0.05),
+  c1 = beta(0.70, 0.10), c2 = truncate(normal(1.5, 0.25), lower = 1),
+  eps_pi = invgamma(1, 0.5)
+), iter = 4000, chains = 2)
+est
+plot(est)                                   # prior vs posterior
+plot(posterior_forecast(est, horizon = 12)) # parameter-uncertainty fans
+```
+
 ## Quickstart
 
 ```r
@@ -150,7 +175,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
 | 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
 | 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
-| 0.4 | Bayesian estimation, identification diagnostics, posterior fans |
+| 0.4 | Bayesian estimation — **in progress** (`priors()`, `qpm_estimate()` with adaptive RWM and R-hat/ESS, `posterior_forecast()` shipped in the dev version; next: formal identification diagnostics, estimation vignette, marginal likelihood) |
 | 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |
 
 ## Design commitments
