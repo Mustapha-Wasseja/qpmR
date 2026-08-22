@@ -118,6 +118,8 @@ plot.qpm_irf <- function(x, vars = NULL, ...) {
 
 qpm_palette <- function(n) {
   base <- c("#1f5da8", "#c23f2e", "#2c8455", "#8455a0", "#b0791f",
-            "#3c94a8", "#a04f78", "#5a5a5a")
-  rep_len(base, n)
+            "#3c94a8", "#a04f78", "#5a5a5a", "#7fb2e5", "#e5a13c",
+            "#66b28a", "#b88ac4", "#8a6d3b", "#495e8a")
+  if (n <= length(base)) return(base[seq_len(n)])
+  grDevices::hcl.colors(n, "Dark 3")
 }

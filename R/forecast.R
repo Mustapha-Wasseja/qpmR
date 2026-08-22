@@ -10,10 +10,10 @@
 #' simulation (or is the steady state).
 #'
 #' @param object A `qpm_solution`.
-#' @param from Initial state: a `qpm_sim` from [simulate()] (its final
-#'   state is used, and its path is kept as history for plotting), a full
-#'   named deviation vector over `object$vars_all`, or `NULL` (steady
-#'   state).
+#' @param from Initial state: a `qpm_filtration` from [qpm_filter()] (the
+#'   smoothed end-of-sample state is used and the smoothed history is kept
+#'   for plotting), a `qpm_sim` from [simulate()], a full named deviation
+#'   vector over `object$vars_all`, or `NULL` (steady state).
 #' @param horizon Forecast horizon in quarters.
 #' @param bands Coverage levels for the fan, e.g. `c(0.5, 0.7, 0.9)`.
 #' @param sigma Optional named vector of shock standard deviations.
@@ -35,14 +35,17 @@ qpm_forecast <- function(object, from = NULL, horizon = 12,
   history <- NULL
   if (is.null(from)) {
     x0 <- rep(0, N)
+  } else if (inherits(from, "qpm_filtration")) {
+    x0 <- from$states_dev[nrow(from$states_dev), ]
+    history <- from$states
   } else if (inherits(from, "qpm_sim")) {
     x0 <- attr(from, "state")
     history <- from
   } else if (is.numeric(from) && length(from) == N) {
     x0 <- as.numeric(from)
   } else {
-    stop(paste0("from must be NULL, a qpm_sim, or a full deviation vector over ",
-                "object$vars_all (filtered initial states arrive with qpm_filter in 0.2)"),
+    stop(paste0("from must be NULL, a qpm_filtration, a qpm_sim, or a full ",
+                "deviation vector over object$vars_all"),
          call. = FALSE)
   }
 

@@ -113,6 +113,8 @@ eqs <- function(...) {
 #' an ordinary function.
 #'
 #' @param x A variable reference such as `pi[+1]`.
+#' @return No return value; calling `E()` outside of model equations is
+#'   an error by design.
 #' @export
 E <- function(x) {
   stop("E() is only meaningful inside qpm model equations declared with eqs()",

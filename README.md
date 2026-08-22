@@ -41,6 +41,24 @@ Version 0.1 delivers the model layer of that chain.
   `steady_state()`, `eigen_table()`, and `qpm_lint()` for
   specification checks.
 
+And in the development version (the start of 0.2 — filtration):
+
+- **`qpm_filter()`** — Kalman filter + RTS smoother over the solved
+  model: jointly infers every latent state (output gap, neutral rate,
+  equilibrium exchange rate, trends) and the historical structural
+  shocks from whatever subset of variables you observe. Missing data
+  and ragged edges handled; innovation diagnostics (Ljung–Box,
+  outlier flags) printed. The likelihood is tested against the exact
+  closed-form Gaussian likelihood.
+- **`qpm_decompose()`** — exact historical shock decompositions of the
+  smoothed history (contributions verified to sum to the states), with
+  stacked-bar charts.
+- **`state_space()`** — the exact `T`, `R`, `Z`, `H`, `Qc`, `P1`
+  matrices used internally, exported so other estimators can build on
+  qpmR.
+- **`qpm_forecast(from = <filtration>)`** — forecast from the smoothed
+  end-of-sample state, with the smoothed history on the fan chart.
+
 ## Quickstart
 
 ```r
@@ -68,8 +86,8 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 
 | Version | Focus |
 |---|---|
-| 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template |
-| 0.2 | Kalman filter/smoother (`qpm_filter()`): gaps, `r*`, equilibrium RER, shock decompositions, random-walk trends |
+| 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
+| 0.2 | Kalman filter/smoother, shock decompositions — **in progress** (filter, smoother, decompositions shipped in the dev version; next: random-walk trends via diffuse initialization, filter-based real-data workflow, example country dataset) |
 | 0.3 | Conditional forecasts (`qpm_condition()`, anticipated vs unanticipated), judgment ledger (`add_judgment()`), forecast rounds |
 | 0.4 | Bayesian estimation, identification diagnostics, posterior fans |
 | 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |

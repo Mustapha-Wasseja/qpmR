@@ -15,10 +15,10 @@ qpm_forecast(
 \arguments{
 \item{object}{A \code{qpm_solution}.}
 
-\item{from}{Initial state: a \code{qpm_sim} from \code{\link[=simulate]{simulate()}} (its final
-state is used, and its path is kept as history for plotting), a full
-named deviation vector over \code{object$vars_all}, or \code{NULL} (steady
-state).}
+\item{from}{Initial state: a \code{qpm_filtration} from \code{\link[=qpm_filter]{qpm_filter()}} (the
+smoothed end-of-sample state is used and the smoothed history is kept
+for plotting), a \code{qpm_sim} from \code{\link[=simulate]{simulate()}}, a full named deviation
+vector over \code{object$vars_all}, or \code{NULL} (steady state).}
 
 \item{horizon}{Forecast horizon in quarters.}
 
