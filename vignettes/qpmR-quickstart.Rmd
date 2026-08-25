@@ -85,6 +85,47 @@ The fan bands are analytic, from the forecast-error variance recursion
 qpm_lint(m)
 ```
 
+## Adapting the model to your country
+
+Real engagements never use the canonical model unchanged. Extension
+blocks make that adaptation reusable and reviewable instead of a fork.
+
+The most common adaptation is disaggregating the CPI. Food is 30-50
+percent of the basket across most of sub-Saharan Africa and South Asia,
+and a single-inflation model cannot represent the policy question there
+-- supply shocks to food dominate headline, but policy should look
+through the relative-price component:
+
+```{r}
+m_food <- add_block(qpm_template("bkl"), block_food_cpi(weight = 0.45))
+plot(irf(qpm_solve(m_food), shock = "eps_pifood", horizon = 16),
+     vars = c("pi_food", "pi", "pi_core", "i"))
+```
+
+Food inflation jumps, headline follows scaled by the basket weight, and
+core barely moves -- so the policy response stays small. That is the
+model saying what a good desk would say.
+
+Exchange-rate management is the other common adaptation. One
+`intensity` argument spans the regimes: zero reproduces the free float
+exactly, larger values approach a peg.
+
+```{r}
+peak_q <- function(m) {
+  ir <- irf(qpm_solve(m), shock = "eps_prem", horizon = 12, size = 1)
+  max(abs(ir$value[ir$variable == "q"]))
+}
+c(float   = peak_q(qpm_template("bkl")),
+  managed = peak_q(add_block(qpm_template("bkl"), block_fx_intervention(1))),
+  peg     = peak_q(add_block(qpm_template("bkl"), block_fx_intervention(4))))
+```
+
+Whatever a country team changes, `qpm_diff()` makes it reviewable:
+
+```{r}
+qpm_diff(qpm_template("bkl"), m_food)
+```
+
 ## Real data: Czechia
 
 qpmR ships `czechia`, a quarterly dataset from 1996 in the model's units

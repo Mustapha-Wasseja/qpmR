@@ -4,10 +4,13 @@
 \alias{qpm_template}
 \title{Shipped model templates}
 \usage{
-qpm_template(name = c("bkl"), trends = c("stationary", "rw"))
+qpm_template(
+  name = c("bkl", "bkl_food", "managed_fx"),
+  trends = c("stationary", "rw")
+)
 }
 \arguments{
-\item{name}{Template name; currently \code{"bkl"}.}
+\item{name}{Template name: \code{"bkl"}, \code{"bkl_food"}, or \code{"managed_fx"}.}
 
 \item{trends}{\code{"stationary"} or \code{"rw"}; see Details.}
 }
@@ -47,6 +50,16 @@ Conventions: gaps in percentage points; inflation QoQ annualised;
 interest rates in percent per annum; \code{q} is 100 times the log real
 exchange rate, an increase is a real depreciation; \code{dy_obs} is QoQ
 annualised real GDP growth.
+
+Country-shaped variants are shipped as shortcuts for the canonical
+model plus an extension block (see \code{\link[=add_block]{add_block()}}):
+\itemize{
+\item \code{"bkl_food"} — headline CPI split into food and core
+(\code{\link[=block_food_cpi]{block_food_cpi()}}), the configuration for economies where food is
+a large share of the basket.
+\item \code{"managed_fx"} — a leaning-against-the-wind intervention rule
+entering the UIP block (\code{\link[=block_fx_intervention]{block_fx_intervention()}}).
+}
 }
 \examples{
 m <- qpm_template("bkl")

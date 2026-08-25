@@ -1,3 +1,34 @@
+# qpmR (development version)
+
+Model extension blocks — the start of the 1.0 country-adaptation layer.
+
+* `qpm_block()` / `add_block()`: reusable bundles of variables, shocks,
+  parameters and equations that adapt a template to a country without
+  forking it. Equations whose left-hand side names an existing variable
+  replace that variable's equation; equations for newly declared
+  variables are appended. Blocks compose, and each one is recorded in
+  the model's `meta$blocks`.
+* `block_food_cpi()`: headline CPI split into food and core. The
+  Phillips curve moves to core, food gets its own persistence, stronger
+  exchange-rate pass-through, and error correction on the relative food
+  price, and headline becomes the weighted identity. Food is 30-50
+  percent of the basket across most of sub-Saharan Africa and South
+  Asia, where a single-inflation model is unusable; a food supply shock
+  in this block raises headline while leaving core essentially
+  untouched, which is the relative-price story policy should look
+  through.
+* `block_fx_intervention()`: a leaning-against-the-wind intervention
+  rule entering the UIP block, so one model spans a continuum of
+  exchange-rate regimes — `intensity = 0` reproduces the free float
+  exactly, moderate values a managed float, large values approach a peg
+  (the peak exchange-rate response to a risk-premium shock falls from
+  0.97 to 0.53 to 0.08 across those settings).
+* `qpm_template()` gains the `"bkl_food"` and `"managed_fx"` shortcuts.
+* `qpm_diff()`: structural comparison of two models — variables,
+  shocks, parameters and equations added, removed or changed, plus
+  recalibrations — so a country team's customization is reviewable as a
+  diff rather than a fork.
+
 # qpmR 0.4.0
 
 The estimation layer is complete.

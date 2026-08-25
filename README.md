@@ -139,6 +139,24 @@ And since 0.4 — the estimation layer:
 - **`marginal_likelihood()`** — modified harmonic mean with a Laplace
   cross-check; differences across models are log Bayes factors.
 
+And in the development version (the start of 1.0 — country adaptation):
+
+- **`add_block()`** — extension blocks that adapt a template to a
+  country without forking it, composable and recorded in the model.
+- **`block_food_cpi()`** — headline CPI split into food and core, the
+  configuration every LIC/EM engagement needs and rebuilds by hand. A
+  food supply shock moves headline while leaving core untouched.
+- **`block_fx_intervention()`** — a managed float: one model spanning
+  free float through peg by a single `intensity` argument.
+- **`qpm_diff()`** — a country customization reviewed as a diff.
+
+```r
+m <- add_block(qpm_template("bkl"), block_food_cpi(weight = 0.45))
+plot(irf(qpm_solve(m), shock = "eps_pifood"),
+     vars = c("pi_food", "pi", "pi_core", "i"))
+qpm_diff(qpm_template("bkl"), m)
+```
+
 ```r
 est <- qpm_estimate(mcz, cz, priors(
   b1 = beta(0.70, 0.10), b2 = gamma(0.25, 0.10), b3 = gamma(0.10, 0.05),
@@ -181,7 +199,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
 | 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
 | 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette — done |
-| 1.0 | Full FPAS workflow: round store, revision decomposition, Quarto report templates, chart packs |
+| 1.0 | Country adaptation (extension blocks, `qpm_diff()`) — **in progress**; then Quarto report templates, chart packs, `verify_round()`, CRAN submission |
 
 ## Design commitments
 

@@ -30,7 +30,16 @@
 #' exchange rate, an increase is a real depreciation; `dy_obs` is QoQ
 #' annualised real GDP growth.
 #'
-#' @param name Template name; currently `"bkl"`.
+#' Country-shaped variants are shipped as shortcuts for the canonical
+#' model plus an extension block (see [add_block()]):
+#'
+#' * `"bkl_food"` — headline CPI split into food and core
+#'   ([block_food_cpi()]), the configuration for economies where food is
+#'   a large share of the basket.
+#' * `"managed_fx"` — a leaning-against-the-wind intervention rule
+#'   entering the UIP block ([block_fx_intervention()]).
+#'
+#' @param name Template name: `"bkl"`, `"bkl_food"`, or `"managed_fx"`.
 #' @param trends `"stationary"` or `"rw"`; see Details.
 #' @return A calibrated `qpm_model`.
 #' @references Berg, A., Karam, P., and Laxton, D. (2006). A Practical
@@ -41,10 +50,15 @@
 #' summary(m)
 #' m_rw <- qpm_template("bkl", trends = "rw")
 #' @export
-qpm_template <- function(name = c("bkl"), trends = c("stationary", "rw")) {
+qpm_template <- function(name = c("bkl", "bkl_food", "managed_fx"),
+                         trends = c("stationary", "rw")) {
   name <- match.arg(name)
   trends <- match.arg(trends)
-  bkl_template(trends)
+  m <- bkl_template(trends)
+  switch(name,
+         bkl = m,
+         bkl_food = add_block(m, block_food_cpi()),
+         managed_fx = add_block(m, block_fx_intervention()))
 }
 
 bkl_template <- function(trends = "stationary") {
