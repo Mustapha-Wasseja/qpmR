@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml)
-[![Codecov test coverage](https://codecov.io/gh/Mustapha-Wasseja/qpmR/graph/badge.svg)](https://app.codecov.io/gh/Mustapha-Wasseja/qpmR)
+[![test-coverage](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/test-coverage.yaml/badge.svg)](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/test-coverage.yaml)
 [![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
@@ -238,6 +238,19 @@ validates `add_block()` independently — Dynare parses the original
 equations and builds its own auxiliary variables, so the two
 implementations agree only if both handle long leads and lags correctly.
 Regenerate the golden files with `data-raw/dynare_golden.R`.
+
+## Testing
+
+466 assertions across 18 files, at **87.7% line coverage** — measured on
+every push by the `test-coverage` workflow. The suite pins the solver to
+analytic solutions (AR(1), hybrid roots, brute-force perfect foresight),
+the Kalman filter to the exact closed-form Gaussian likelihood, the
+revision decomposition to exact telescoping, and the whole solver to
+Dynare (above).
+
+To publish the coverage percentage as a badge, add a `CODECOV_TOKEN`
+repository secret from <https://app.codecov.io>; the workflow already
+uploads to Codecov and only needs the token.
 
 ## Design commitments
 
