@@ -28,4 +28,4 @@ Useful links:
 
 ## Author
 
-**Maintainer**: Mustapha Mohammed <muswaseja@gmail.com>
+**Maintainer**: Mustapha Mohammed <mustapha.wasseja.mohammed@gmail.com>
