@@ -1,6 +1,32 @@
 # qpmR (development version)
 
-Model extension blocks — the start of the 1.0 country-adaptation layer.
+The 1.0 reporting and audit layer, plus country-adaptation blocks.
+
+## Reporting and audit
+
+* `qpm_report()`: turns a round into the document a policy meeting is
+  run from — executive summary with the numbers filled in, forecast
+  table and fan charts, filtered gaps, shock decomposition, the
+  judgment ledger with its implied shocks, an optional revision
+  decomposition against the previous round, and a reproducibility
+  appendix. The `.Rmd` source is always written (institutions replace
+  the template's text, not its plumbing) and rendered to HTML/PDF/Word
+  when pandoc or Quarto is available; where neither is — air-gapped
+  forecasting machines, bare CI runners — it says so and returns the
+  source rather than failing.
+* `chart_pack()`: the standard round chart set (forecast fans,
+  filtered latent states, shock decomposition, monetary transmission)
+  as a multi-page PDF or numbered PNGs.
+* `verify_round()`: re-runs an archived round from its own contents and
+  checks that the published numbers come back, reporting the largest
+  deviation, the worst variables, and any qpmR version drift. When the
+  round is loaded from a store it also checks the human-readable CSV
+  sidecars against the object, so a hand-edited audit trail is
+  detected.
+* Stacked-bar decomposition and revision charts leave headroom for
+  their legends.
+
+## Country adaptation
 
 * `qpm_block()` / `add_block()`: reusable bundles of variables, shocks,
   parameters and equations that adapt a template to a country without

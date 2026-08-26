@@ -219,6 +219,36 @@ rounds. `save_round()` / `load_round()` / `list_rounds()` manage the
 on-disk round store, with human-readable CSV sidecars for auditing
 without R.
 
+## Closing the round: audit and report
+
+An archived round is only useful if it still reproduces. `verify_round()`
+re-runs the whole pipeline from the round's own contents — model,
+calibration, data vintage, conditions and judgment — and checks the
+published numbers against the archive:
+
+```{r}
+verify_round(rB)
+```
+
+A round that no longer reproduces is a finding, not a mystery: the
+report names the largest deviation, the variables responsible, and any
+qpmR version drift. Loaded from a store, it also checks the CSV
+sidecars against the object, so a hand-edited audit trail shows up.
+
+The round then becomes the deliverables a policy meeting runs on — the
+standard chart pack and the monetary policy report, which carries the
+executive summary, the fan charts, the gaps, the shock decomposition,
+the judgment ledger and the revision against the previous round:
+
+```{r, eval = FALSE}
+chart_pack(rB, "chart_pack.pdf")
+qpm_report(rB, "mpr.html", compare_to = rA)
+```
+
+`qpm_report()` always writes the `.Rmd` source next to its output, on
+the principle that institutions replace the template's *text*, not its
+plumbing.
+
 ## Where this is going
 
 Estimation — priors, posterior sampling on the filter likelihood,

@@ -119,6 +119,7 @@ plot.qpm_decomposition <- function(x, var = NULL, drop_zero = TRUE,
 
   cols <- c(qpm_palette(length(comps) - 1L), "grey72")
   ylim <- range(rowSums(M * (M > 0)), rowSums(M * (M < 0)), total)
+  ylim[2] <- ylim[2] + 0.22 * diff(ylim)   # headroom for the legend
   labels <- attr(x, "labels")
   n <- length(keep)
 

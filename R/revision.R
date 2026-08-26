@@ -256,6 +256,7 @@ plot.qpm_revision <- function(x, variable = NULL, ...) {
   n <- nrow(d)
   cols <- qpm_palette(length(REV_COMPONENTS))
   ylim <- range(rowSums(M * (M > 0)), rowSums(M * (M < 0)), d$total, 0)
+  ylim[2] <- ylim[2] + 0.28 * diff(ylim)   # headroom for the legend
   labels <- attr(x, "labels")
 
   op <- graphics::par(mar = c(2.6, 2.8, 2.0, 0.6), mgp = c(1.6, 0.4, 0),

@@ -139,7 +139,25 @@ And since 0.4 — the estimation layer:
 - **`marginal_likelihood()`** — modified harmonic mean with a Laplace
   cross-check; differences across models are log Bayes factors.
 
-And in the development version (the start of 1.0 — country adaptation):
+And in the development version (1.0 — reporting, audit, country adaptation):
+
+- **`qpm_report()`** — a round becomes the monetary policy report: an
+  executive summary with the numbers filled in, fan charts, gaps, the
+  shock decomposition, the judgment ledger, the revision against the
+  previous round, and a reproducibility appendix. The `.Rmd` source is
+  always written so teams edit the text, not the plumbing; rendering
+  degrades gracefully where pandoc is unavailable.
+- **`chart_pack()`** — the standard round chart set as a multi-page PDF.
+- **`verify_round()`** — re-runs an archived round and confirms the
+  published numbers still come back, flagging version drift and
+  hand-edited CSV sidecars.
+
+```r
+verify_round(r)                       # does the archive still reproduce?
+chart_pack(r, "chart_pack.pdf")
+qpm_report(r, "mpr.html", compare_to = previous_round)
+```
+
 
 - **`add_block()`** — extension blocks that adapt a template to a
   country without forking it, composable and recorded in the model.
@@ -199,7 +217,7 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
 | 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
 | 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette — done |
-| 1.0 | Country adaptation (extension blocks, `qpm_diff()`) — **in progress**; then Quarto report templates, chart packs, `verify_round()`, CRAN submission |
+| 1.0 | Country adaptation (extension blocks, `qpm_diff()`), reporting (`qpm_report()`, `chart_pack()`) and audit (`verify_round()`) — done; CRAN submission next |
 
 ## Design commitments
 

@@ -26,6 +26,7 @@ Imports:
     graphics,
     grDevices
 Suggests:
+    quarto,
     testthat (>= 3.0.0),
     knitr,
     rmarkdown

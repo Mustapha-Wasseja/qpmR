@@ -1,0 +1,173 @@
+---
+title: "@TITLE@"
+subtitle: "@SUBTITLE@"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    theme: readable
+    self_contained: true
+  pdf_document:
+    toc: true
+  word_document:
+    toc: true
+embed-resources: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.width = 8, fig.height = 5.5)
+library(qpmR)
+.bundle <- readRDS("@BUNDLE@")
+round <- .bundle$round
+prev  <- .bundle$compare_to
+fc    <- round$forecast
+sol   <- round$solution
+hv    <- intersect(c(if ("pi4" %in% sol$vars) "pi4" else "pi", "i", "y_gap", "q"),
+                   sol$vars)
+infl  <- hv[1]
+at <- function(v, h) {
+  d <- fc$paths[fc$paths$variable == v & fc$paths$h == h, ]
+  if (nrow(d)) d$mean else NA_real_
+}
+h_end <- fc$horizon
+h_yr  <- min(4L, h_end)
+```
+
+## Executive summary
+
+The forecast is conditioned on data through **`r as.character(round$fit$period[round$fit$n_obs])`**
+and runs to **`r fc$periods[h_end]`**.
+
+- Inflation (`r infl`) is projected at **`r sprintf("%.1f", at(infl, h_yr))`%**
+  four quarters ahead and **`r sprintf("%.1f", at(infl, h_end))`%** at the end of
+  the horizon, against a steady state of `r sprintf("%.1f", sol$ss[[infl]])`%.
+- The policy rate reaches **`r sprintf("%.1f", at("i", h_yr))`%** after four
+  quarters.
+- The output gap is **`r sprintf("%+.1f", at("y_gap", h_yr))`** percentage points
+  four quarters ahead.
+
+```{r summary-judgment, results = "asis"}
+if (!is.null(fc$judgment) && nrow(fc$judgment)) {
+  cat(sprintf("- The projection embeds **%d judgment entr%s** (see the ledger below).\n",
+              nrow(fc$judgment), if (nrow(fc$judgment) == 1L) "y" else "ies"))
+}
+if (!is.null(fc$conditions) && sum(fc$conditions$source == "condition")) {
+  cn <- fc$conditions[fc$conditions$source == "condition", ]
+  cat(sprintf("- It is conditioned on assumed paths for **%s** (%s).\n",
+              paste(unique(cn$variable), collapse = ", "),
+              if (isTRUE(fc$anticipated)) "announced" else "unanticipated"))
+}
+```
+
+## The projection
+
+```{r forecast-fan}
+plot(fc, vars = hv)
+```
+
+```{r forecast-table}
+hs <- unique(pmin(c(1, 2, 4, 8, h_end), h_end))
+tab <- data.frame(period = fc$periods[hs])
+for (v in hv) tab[[v]] <- round(vapply(hs, function(h) at(v, h), numeric(1)), 2)
+knitr::kable(tab, row.names = FALSE,
+             caption = "Projected paths (posterior mean of the model forecast)")
+```
+
+## Where the economy stands
+
+Latent states inferred from the data by the Kalman smoother: the output
+gap, equilibrium processes, and the real rate gap that drives demand.
+
+```{r gaps}
+latent <- setdiff(sol$vars, round$observables)
+gv <- intersect(c("y_gap", "r_gap", "q_gap", "dy_bar", "r_bar", "q_bar"), latent)
+if (length(gv)) plot(round$fit, vars = utils::head(gv, 4))
+```
+
+```{r decomposition, fig.height = 4.5}
+dv <- if ("pi4" %in% sol$vars) "pi4" else "pi"
+dec <- qpm_decompose(round$fit, vars = dv)
+n <- round$fit$n_obs
+plot(dec, var = dv, periods = max(1L, n - 31L):n)
+```
+
+## Judgment
+
+```{r judgment, results = "asis"}
+if (is.null(fc$judgment) || !nrow(fc$judgment)) {
+  cat("This round is pure model output: no judgment was imposed.\n")
+} else {
+  j <- fc$judgment[, c("id", "author", "variable", "period", "add", "target",
+                       "rationale")]
+  j$add <- sprintf("%+.2f", j$add)
+  j$target <- round(j$target, 2)
+  print(knitr::kable(j, row.names = FALSE,
+                     caption = "Judgment ledger: every adjustment, its author and its rationale"))
+  cat("\n\nImplied shocks supporting the judgment, in standard deviations:\n\n")
+  u <- fc$shocks_implied_std
+  mx <- apply(abs(u), 2, max)
+  mx <- sort(mx[mx > 1e-8], decreasing = TRUE)
+  cat(paste(sprintf("- `%s`: %.2f sd%s", names(mx), mx,
+                    ifelse(mx > 2, " **(implausibly large)**", "")),
+            collapse = "\n"), "\n")
+}
+```
+
+```{r revision, results = "asis", fig.height = 4.5}
+if (!is.null(prev)) {
+  cat("## Revision since the previous round\n\n")
+  rev <- try(compare_rounds(prev, round, variables = hv), silent = TRUE)
+  if (inherits(rev, "qpm_revision")) {
+    d <- as.data.frame(rev)
+    d <- d[d$variable == infl, ]
+    show <- d[, c("period", "old", "new", "total", "parameters",
+                  "data_revisions", "new_data", "conditions", "judgment")]
+    show[-1] <- lapply(show[-1], round, 2)
+    print(knitr::kable(show, row.names = FALSE,
+                       caption = sprintf("Revision of %s: %s to %s", infl,
+                                         prev$name, round$name)))
+    cat("\n")
+    plot(rev, variable = infl)
+  } else {
+    cat("_The rounds could not be compared:_ ", as.character(rev), "\n")
+  }
+}
+```
+
+## Model and calibration
+
+```{r model-info, results = "asis"}
+cat(sprintf("Model: **%s** — %d equations, %d shocks.\n\n",
+            round$model$name, length(round$model$equations),
+            length(round$model$shocks)))
+if (length(round$model$meta$blocks)) {
+  cat("Country adaptations applied:\n\n")
+  for (b in round$model$meta$blocks)
+    cat(sprintf("- **%s**%s\n", b$name,
+                if (nzchar(b$description)) paste0(" — ", b$description) else ""))
+  cat("\n")
+}
+p <- round$model$params
+knitr::kable(data.frame(parameter = names(p), value = unname(p)),
+             row.names = FALSE, caption = "Calibration")
+```
+
+## Reproducibility
+
+```{r repro, results = "asis"}
+cat(sprintf("- Data vintage: %s to %s (%d quarters), observables: %s.\n",
+            as.character(round$fit$period[1]),
+            as.character(round$fit$period[round$fit$n_obs]),
+            round$fit$n_obs, paste(round$observables, collapse = ", ")))
+cat(sprintf("- Filter log-likelihood: %.2f%s.\n", round$fit$loglik,
+            if (isTRUE(round$fit$diffuse))
+              sprintf(" (diffuse initialization, %d unit roots)", round$fit$n_unit) else ""))
+lb <- round$fit$diag$ljung_box
+if (any(!is.na(lb)))
+  cat(sprintf("- Innovation diagnostics: smallest Ljung-Box p-value %.2f (%s).\n",
+              min(lb, na.rm = TRUE), names(lb)[which.min(lb)]))
+cat(sprintf("- Produced with qpmR %s on %s.\n", round$qpmR_version, round$created))
+cat("\nThis round can be re-run and checked against these numbers with `verify_round()`.\n")
+```
