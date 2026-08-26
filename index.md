@@ -274,6 +274,19 @@ auxiliary variables, so the two implementations agree only if both
 handle long leads and lags correctly. Regenerate the golden files with
 `data-raw/dynare_golden.R`.
 
+## Testing
+
+466 assertions across 18 files, at **87.7% line coverage** — measured on
+every push by the `test-coverage` workflow. The suite pins the solver to
+analytic solutions (AR(1), hybrid roots, brute-force perfect foresight),
+the Kalman filter to the exact closed-form Gaussian likelihood, the
+revision decomposition to exact telescoping, and the whole solver to
+Dynare (above).
+
+To publish the coverage percentage as a badge, add a `CODECOV_TOKEN`
+repository secret from <https://app.codecov.io>; the workflow already
+uploads to Codecov and only needs the token.
+
 ## Design commitments
 
 1.  **Everything has an escape hatch.** `sol$P`, `sol$Q`,

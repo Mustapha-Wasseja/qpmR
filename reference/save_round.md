@@ -51,6 +51,6 @@ store <- file.path(tempdir(), "rounds")
 save_round(r, store)
 list_rounds(store)
 #>   name          created data_to horizon n_judgment
-#> 1 demo 2026-08-26 06:16 2026-Q1       8          0
+#> 1 demo 2026-08-26 06:25 2026-Q1       8          0
 r2 <- load_round("demo", store)
 ```

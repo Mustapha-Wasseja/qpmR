@@ -245,6 +245,12 @@
 <p>Across <strong>4080 impulse-response points</strong> (12 shocks x 17 variables x 20 quarters) the largest discrepancy is <strong>1.4e-14</strong>, with steady states agreeing to 8e-14. The food-block model agrees to 1.7e-14, which also validates <code><a href="reference/add_block.html">add_block()</a></code> independently — Dynare parses the original equations and builds its own auxiliary variables, so the two implementations agree only if both handle long leads and lags correctly. Regenerate the golden files with <code>data-raw/dynare_golden.R</code>.</p>
 </div>
 <div class="section level2">
+<h2 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a>
+</h2>
+<p>466 assertions across 18 files, at <strong>87.7% line coverage</strong> — measured on every push by the <code>test-coverage</code> workflow. The suite pins the solver to analytic solutions (AR(1), hybrid roots, brute-force perfect foresight), the Kalman filter to the exact closed-form Gaussian likelihood, the revision decomposition to exact telescoping, and the whole solver to Dynare (above).</p>
+<p>To publish the coverage percentage as a badge, add a <code>CODECOV_TOKEN</code> repository secret from <a href="https://app.codecov.io" class="external-link uri">https://app.codecov.io</a>; the workflow already uploads to Codecov and only needs the token.</p>
+</div>
+<div class="section level2">
 <h2 id="design-commitments">Design commitments<a class="anchor" aria-label="anchor" href="#design-commitments"></a>
 </h2>
 <ol style="list-style-type: decimal">
@@ -306,7 +312,7 @@
 <h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
 <li><a href="https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
-<li><a href="https://app.codecov.io/gh/Mustapha-Wasseja/qpmR" class="external-link"><img src="https://codecov.io/gh/Mustapha-Wasseja/qpmR/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/test-coverage.yaml" class="external-link"><img src="https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/test-coverage.yaml/badge.svg" alt="test-coverage"></a></li>
 <li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle: stable"></a></li>
 </ul>
 </div>
