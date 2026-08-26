@@ -5,6 +5,7 @@ CMD
 CNB
 COVID
 CZK
+Codecov
 Czechia
 DSGE
 Dynare
@@ -23,6 +24,7 @@ Kalman
 Karam
 LIC
 Laseen
+Lifecycle
 Ljung
 Lyapunov
 Meridia
@@ -48,10 +50,13 @@ estimate's
 forecast's
 jmoneco
 koruna's
+mod
 outturn
 outturns
 pandoc
+pkgdown
 qpm
+qpmR's
 qz
 recalibrations
 replayable
@@ -64,3 +69,4 @@ shock's
 targeter
 th
 unrendered
+varexo

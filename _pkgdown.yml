@@ -1,0 +1,126 @@
+url: https://mustapha-wasseja.github.io/qpmR/
+
+template:
+  bootstrap: 5
+  bslib:
+    primary: "#1f5da8"
+    base_font: {google: "Source Sans 3"}
+    heading_font: {google: "Source Sans 3"}
+    code_font: {google: "JetBrains Mono"}
+
+home:
+  title: Quarterly Projection Models for Monetary Policy Analysis
+  description: >
+    The forecasting and policy analysis workflow used in central banks,
+    end to end in R: filtering, gaps, baseline, judgment, scenarios,
+    forecast rounds, estimation and reporting.
+
+navbar:
+  structure:
+    left: [intro, reference, articles, news]
+    right: [search, github]
+  components:
+    articles:
+      text: Articles
+      menu:
+      - text: A forecast in ten minutes
+        href: articles/qpmR-quickstart.html
+      - text: Estimation, identification, Bayes factors
+        href: articles/qpmR-estimation.html
+
+reference:
+
+- title: Specifying a model
+  desc: >
+    Declare a model in R, or start from the canonical small open economy
+    template and check it before you use it.
+  contents:
+  - qpm_model
+  - vars
+  - var
+  - shocks
+  - eqs
+  - E
+  - qpm_calibrate
+  - qpm_template
+  - qpm_lint
+
+- title: Adapting a model to a country
+  desc: >
+    Extension blocks bundle the changes a country needs — disaggregated
+    food inflation, a managed exchange rate — so an adaptation is
+    reviewable as a diff rather than a fork.
+  contents:
+  - qpm_block
+  - add_block
+  - block_food_cpi
+  - block_fx_intervention
+  - qpm_diff
+
+- title: Solving and model properties
+  desc: >
+    The generalized Schur solution, its diagnostics, and what the model
+    implies about transmission.
+  contents:
+  - qpm_solve
+  - steady_state
+  - eigen_table
+  - irf
+  - simulate.qpm_solution
+  - state_space
+
+- title: Filtering the data
+  desc: >
+    Infer the latent states — output gap, neutral rate, equilibrium
+    exchange rate — and the historical shocks behind them.
+  contents:
+  - qpm_filter
+  - qpm_decompose
+
+- title: Forecasting and policy analysis
+  desc: >
+    The baseline projection, assumed paths, alternative scenarios, and
+    judgment as a logged and auditable operation.
+  contents:
+  - qpm_forecast
+  - qpm_condition
+  - qpm_scenario
+  - add_judgment
+  - judgment_log
+  - posterior_forecast
+
+- title: Forecast rounds
+  desc: >
+    A round binds model, calibration, data vintage and forecast into one
+    replayable artefact — then answers why the forecast moved, and
+    whether the archive still reproduces.
+  contents:
+  - qpm_round
+  - save_round
+  - load_round
+  - list_rounds
+  - compare_rounds
+  - verify_round
+
+- title: Estimation
+  desc: >
+    Priors, posterior sampling over the Kalman-filter likelihood,
+    identification diagnostics and marginal likelihoods.
+  contents:
+  - priors
+  - qpm_estimate
+  - apply_estimate
+  - qpm_identify
+  - marginal_likelihood
+
+- title: Reporting
+  desc: The deliverables a policy round is discussed from.
+  contents:
+  - qpm_report
+  - chart_pack
+
+- title: Interoperability and data
+  contents:
+  - write_dynare
+  - czechia
+  - next_quarters

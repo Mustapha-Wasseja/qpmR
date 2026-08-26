@@ -2,6 +2,8 @@
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/Mustapha-Wasseja/qpmR/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/Mustapha-Wasseja/qpmR/graph/badge.svg)](https://app.codecov.io/gh/Mustapha-Wasseja/qpmR)
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 <!-- badges: end -->
 
 **Quarterly Projection Models for Monetary Policy Analysis in R.**
@@ -218,6 +220,24 @@ plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
 | 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
 | 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette — done |
 | 1.0 | Country adaptation (extension blocks, `qpm_diff()`), reporting (`qpm_report()`, `chart_pack()`) and audit (`verify_round()`) — done; CRAN submission next |
+
+## Does it agree with Dynare?
+
+Yes — and you can check rather than take it on trust. `write_dynare()`
+exports any model as a `.mod` file, and the test suite pins qpmR's
+impulse responses to golden files produced by Dynare 6.0:
+
+```r
+write_dynare(qpm_template("bkl"), "bkl.mod")
+```
+
+Across **4080 impulse-response points** (12 shocks x 17 variables x 20
+quarters) the largest discrepancy is **1.4e-14**, with steady states
+agreeing to 8e-14. The food-block model agrees to 1.7e-14, which also
+validates `add_block()` independently — Dynare parses the original
+equations and builds its own auxiliary variables, so the two
+implementations agree only if both handle long leads and lags correctly.
+Regenerate the golden files with `data-raw/dynare_golden.R`.
 
 ## Design commitments
 

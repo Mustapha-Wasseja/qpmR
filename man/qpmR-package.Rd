@@ -17,6 +17,7 @@ fan bands via \code{\link[=qpm_forecast]{qpm_forecast()}}.
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://mustapha-wasseja.github.io/qpmR/}
   \item \url{https://github.com/Mustapha-Wasseja/qpmR}
   \item Report bugs at \url{https://github.com/Mustapha-Wasseja/qpmR/issues}
 }

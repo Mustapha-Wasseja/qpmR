@@ -1,6 +1,6 @@
 Package: qpmR
 Title: Quarterly Projection Models for Monetary Policy Analysis
-Version: 1.0.0
+Version: 1.0.0.9000
 Authors@R:
     person("Mustapha", "Mohammed", email = "muswaseja@gmail.com",
            role = c("aut", "cre"))
@@ -40,5 +40,6 @@ Suggests:
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
-URL: https://github.com/Mustapha-Wasseja/qpmR
+URL: https://mustapha-wasseja.github.io/qpmR/,
+    https://github.com/Mustapha-Wasseja/qpmR
 BugReports: https://github.com/Mustapha-Wasseja/qpmR/issues
