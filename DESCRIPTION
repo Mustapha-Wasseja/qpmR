@@ -2,7 +2,7 @@ Package: qpmR
 Title: Quarterly Projection Models for Monetary Policy Analysis
 Version: 1.0.0.9000
 Authors@R:
-    person("Mustapha", "Mohammed", email = "muswaseja@gmail.com",
+    person("Mustapha", "Mohammed", email = "mustapha.wasseja.mohammed@gmail.com",
            role = c("aut", "cre"))
 Description: An end-to-end implementation of the semi-structural quarterly
     projection models used in central-bank forecasting and policy analysis

@@ -19,7 +19,7 @@ Bayesian estimation and reporting.
 
 The one NOTE is the expected
 
-    Maintainer: 'Mustapha Mohammed <muswaseja@gmail.com>'
+    Maintainer: 'Mustapha Mohammed <mustapha.wasseja.mohammed@gmail.com>'
     New submission
 
 from CRAN's incoming feasibility check.

@@ -24,7 +24,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Mustapha Mohammed \email{muswaseja@gmail.com}
+\strong{Maintainer}: Mustapha Mohammed \email{mustapha.wasseja.mohammed@gmail.com}
 
 }
 \keyword{internal}
