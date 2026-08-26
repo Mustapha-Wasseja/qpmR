@@ -154,3 +154,30 @@ eq_coefficients <- function(peq, params, parenv = NULL) {
                               coef = if (nrow(peq$shocks)) unname(coefs[peq$shocks$canon]) else numeric(0),
                               stringsAsFactors = FALSE))
 }
+
+# Coefficients only, in the canonical order variables-then-shocks that
+# build_structure() indexes against. This runs once per equation per solve,
+# and a solve runs once per posterior draw, so it does no more than
+# evaluate the equation once per symbol: no data frames, no name lookups,
+# and no linearity check (linearity is a property of the equations, so it
+# is verified once when the structure is built).
+eq_coefs_values <- function(peq, parenv) {
+  syms <- c(peq$vars$canon, peq$shocks$canon)
+  ev <- new.env(parent = parenv)
+  for (s in syms) assign(s, 0, envir = ev)
+  const <- eval(peq$expr, envir = ev)
+  if (!is.numeric(const) || length(const) != 1L)
+    stop(sprintf("equation %s does not evaluate to a scalar", peq$label),
+         call. = FALSE)
+  const <- as.numeric(const)
+  if (!is.finite(const))
+    stop(sprintf("equation %s evaluates to a non-finite value; check parameters",
+                 peq$label), call. = FALSE)
+  out <- numeric(length(syms))
+  for (j in seq_along(syms)) {
+    assign(syms[j], 1, envir = ev)
+    out[j] <- as.numeric(eval(peq$expr, envir = ev)) - const
+    assign(syms[j], 0, envir = ev)
+  }
+  list(const = const, coefs = out)
+}

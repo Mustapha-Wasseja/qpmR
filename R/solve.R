@@ -55,27 +55,37 @@ qpm_solve <- function(model, tol = 1e-7) {
 # Turns the parsed equations (any lags/leads) into
 #   A x_{t+1} + B x_t + C x_{t-1} + D eps_t + const = 0
 # by introducing auxiliary states v.Lk (lags) and v.Fk (leads).
-build_first_order <- function(model) {
-  parenv <- list2env(as.list(model$params), parent = baseenv())
-  co <- lapply(model$parsed, eq_coefficients, params = model$params,
-               parenv = parenv)
+# Everything about the first-order system that does not depend on the
+# parameter values: which auxiliary states are needed, the expanded state
+# vector, and the exact cell of A, B, C or D that each equation's
+# coefficient lands in. Estimation re-solves the model thousands of times
+# with the same equations and different numbers, so this is computed once
+# per model and only the values are recomputed per solve.
+build_structure <- function(model) {
+  parsed <- model$parsed
   varnames <- model$vars$name
+  n_eq <- length(parsed)
 
-  inc <- do.call(rbind, lapply(seq_along(co), function(i) {
-    d <- co[[i]]$var_coefs
-    if (nrow(d)) cbind(eq = i, d) else NULL
-  }))
-  shk <- do.call(rbind, lapply(seq_along(co), function(i) {
-    d <- co[[i]]$shk_coefs
-    if (nrow(d)) cbind(eq = i, d) else NULL
-  }))
-  consts <- vapply(co, function(z) z$const, numeric(1))
+  # the symbol order eq_coefs_values() returns: variables then shocks
+  nv <- vapply(parsed, function(p) nrow(p$vars), integer(1))
+  ns <- vapply(parsed, function(p) nrow(p$shocks), integer(1))
+  off <- c(0L, cumsum(nv + ns))
 
-  # auxiliary states per variable
+  # flatten every variable reference across equations
+  eq_of <- rep(seq_len(n_eq), nv)
+  var_of <- unlist(lapply(parsed, function(p) as.character(p$vars$var)),
+                   use.names = FALSE)
+  shift_of <- unlist(lapply(parsed, function(p) as.integer(p$vars$shift)),
+                     use.names = FALSE)
+  flat_of <- unlist(lapply(seq_len(n_eq), function(i)
+    if (nv[i]) off[i] + seq_len(nv[i]) else integer(0)), use.names = FALSE)
+  if (is.null(var_of)) { var_of <- character(0); shift_of <- integer(0) }
+
+  # auxiliary states per variable, from the deepest lag and lead it takes
   aux_names <- character(0)
   aux_rows <- list()
   for (v in varnames) {
-    sh <- inc$shift[inc$var == v]
+    sh <- shift_of[var_of == v]
     L <- max(0L, -min(c(sh, 0L)))
     Fd <- max(0L, max(c(sh, 0L)))
     if (L >= 2L) {
@@ -100,52 +110,85 @@ build_first_order <- function(model) {
     }
   }
 
-  # remap deep lags/leads onto auxiliaries
-  if (!is.null(inc) && nrow(inc)) {
-    deep_lag <- inc$shift <= -2L
-    inc$var[deep_lag] <- paste0(inc$var[deep_lag], ".L", -inc$shift[deep_lag] - 1L)
-    inc$shift[deep_lag] <- -1L
-    deep_lead <- inc$shift >= 2L
-    inc$var[deep_lead] <- paste0(inc$var[deep_lead], ".F", inc$shift[deep_lead] - 1L)
-    inc$shift[deep_lead] <- 1L
-  }
+  # remap deep lags and leads onto their auxiliary states
+  deep_lag <- shift_of <= -2L
+  var_of[deep_lag] <- paste0(var_of[deep_lag], ".L", -shift_of[deep_lag] - 1L)
+  shift_of[deep_lag] <- -1L
+  deep_lead <- shift_of >= 2L
+  var_of[deep_lead] <- paste0(var_of[deep_lead], ".F", shift_of[deep_lead] - 1L)
+  shift_of[deep_lead] <- 1L
 
   vars_all <- c(varnames, aux_names)
   N <- length(vars_all)
   n_orig <- length(varnames)
+  col_of <- match(var_of, vars_all)          # the one-off O(N) lookup
 
-  A <- B <- C <- matrix(0, N, N)
-  D <- matrix(0, N, length(model$shocks),
-              dimnames = list(NULL, model$shocks))
-  const <- c(consts, rep(0, length(aux_names)))
+  # linear indices into an N x N matrix, split by which matrix they land in
+  lin <- eq_of + (col_of - 1L) * N
+  by_mat <- function(sel) list(lin = lin[sel], flat = flat_of[sel])
+  Aix <- by_mat(shift_of == 1L)
+  Bix <- by_mat(shift_of == 0L)
+  Cix <- by_mat(shift_of == -1L)
+  for (ix in list(Aix, Bix, Cix))
+    if (anyDuplicated(ix$lin))
+      stop("internal: two coefficients target the same cell of the first-order system",
+           call. = FALSE)
 
-  put <- function(M, eq, v, coef) {
-    j <- match(v, vars_all)
-    M[cbind(eq, j)] <- M[cbind(eq, j)] + coef
-    M
-  }
-  for (r in seq_len(nrow(inc))) {
-    s <- inc$shift[r]
-    if (s == 1L) A <- put(A, inc$eq[r], inc$var[r], inc$coef[r])
-    else if (s == 0L) B <- put(B, inc$eq[r], inc$var[r], inc$coef[r])
-    else C <- put(C, inc$eq[r], inc$var[r], inc$coef[r])
-  }
-  if (!is.null(shk) && nrow(shk)) {
-    for (r in seq_len(nrow(shk)))
-      D[shk$eq[r], shk$shock[r]] <- D[shk$eq[r], shk$shock[r]] + shk$coef[r]
-  }
+  # shocks -> D
+  k <- length(model$shocks)
+  eq_s <- rep(seq_len(n_eq), ns)
+  shk_of <- unlist(lapply(parsed, function(p) as.character(p$shocks$shock)),
+                   use.names = FALSE)
+  flat_s <- unlist(lapply(seq_len(n_eq), function(i)
+    if (ns[i]) off[i] + nv[i] + seq_len(ns[i]) else integer(0)), use.names = FALSE)
+  if (is.null(shk_of)) shk_of <- character(0)
+  Dix <- list(lin = eq_s + (match(shk_of, model$shocks) - 1L) * N,
+              flat = flat_s)
+
+  # the auxiliary identities themselves carry fixed +/-1 coefficients
+  aux_lin <- list(A = integer(0), B = integer(0), C = integer(0))
+  aux_val <- list(A = numeric(0), B = numeric(0), C = numeric(0))
   for (i in seq_along(aux_rows)) {
     eqi <- n_orig + i
     d <- aux_rows[[i]]
     for (r in seq_len(nrow(d))) {
-      s <- d$shift[r]
-      if (s == 1L) A <- put(A, eqi, d$var[r], d$coef[r])
-      else if (s == 0L) B <- put(B, eqi, d$var[r], d$coef[r])
-      else C <- put(C, eqi, d$var[r], d$coef[r])
+      m <- if (d$shift[r] == 1L) "A" else if (d$shift[r] == 0L) "B" else "C"
+      aux_lin[[m]] <- c(aux_lin[[m]], eqi + (match(d$var[r], vars_all) - 1L) * N)
+      aux_val[[m]] <- c(aux_val[[m]], d$coef[r])
     }
   }
 
-  list(A = A, B = B, C = C, D = D, const = const, vars_all = vars_all)
+  list(vars_all = vars_all, N = N, n_eq = n_eq, n_aux = length(aux_names),
+       A = Aix, B = Bix, C = Cix, D = Dix,
+       aux_lin = aux_lin, aux_val = aux_val)
+}
+
+build_first_order <- function(model) {
+  # Rebuild if the cache is absent (a model serialised by an older qpmR)
+  # or no longer matches the equations it was built from.
+  st <- model$structure
+  if (is.null(st) || !identical(st$n_eq, length(model$parsed)) ||
+      !identical(utils::head(st$vars_all, nrow(model$vars)), model$vars$name))
+    st <- build_structure(model)
+  parenv <- list2env(as.list(model$params), parent = baseenv())
+  vals <- lapply(model$parsed, eq_coefs_values, parenv = parenv)
+  coef_flat <- unlist(lapply(vals, `[[`, "coefs"), use.names = FALSE)
+  consts <- vapply(vals, function(z) z$const, numeric(1))
+
+  N <- st$N
+  A <- B <- C <- matrix(0, N, N)
+  D <- matrix(0, N, length(model$shocks),
+              dimnames = list(NULL, model$shocks))
+  if (length(st$A$lin)) A[st$A$lin] <- coef_flat[st$A$flat]
+  if (length(st$B$lin)) B[st$B$lin] <- coef_flat[st$B$flat]
+  if (length(st$C$lin)) C[st$C$lin] <- coef_flat[st$C$flat]
+  if (length(st$D$lin)) D[st$D$lin] <- coef_flat[st$D$flat]
+  if (length(st$aux_lin$A)) A[st$aux_lin$A] <- st$aux_val$A
+  if (length(st$aux_lin$B)) B[st$aux_lin$B] <- st$aux_val$B
+  if (length(st$aux_lin$C)) C[st$aux_lin$C] <- st$aux_val$C
+
+  list(A = A, B = B, C = C, D = D,
+       const = c(consts, rep(0, st$n_aux)), vars_all = st$vars_all)
 }
 
 # -- steady state ------------------------------------------------------------

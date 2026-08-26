@@ -68,10 +68,20 @@ qpm_model <- function(name = "QPM model", variables, shocks, equations,
   if (is.null(sigma)) sigma <- stats::setNames(rep(1, length(shocks)), shocks)
   sigma <- check_sigma(sigma, shocks)
 
-  structure(list(name = name, vars = variables, shocks = shocks,
-                 params = params, sigma = sigma,
-                 equations = equations, parsed = parsed, meta = meta),
-            class = "qpm_model")
+  out <- structure(list(name = name, vars = variables, shocks = shocks,
+                        params = params, sigma = sigma,
+                        equations = equations, parsed = parsed, meta = meta),
+                   class = "qpm_model")
+
+  # Linearity is a property of the equations, so check it once here rather
+  # than on every solve; the same call surfaces unknown symbols early.
+  parenv <- list2env(as.list(params), parent = baseenv())
+  invisible(lapply(parsed, eq_coefficients, params = params, parenv = parenv))
+
+  # Cache the parameter-independent structure of the first-order system.
+  # qpm_calibrate() and estimation change only values, so this stays valid.
+  out$structure <- build_structure(out)
+  out
 }
 
 #' Update a model's calibration
