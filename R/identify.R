@@ -1,7 +1,7 @@
 #' Identification diagnostics (Iskrev-style Jacobian analysis)
 #'
 #' Checks, before any estimation is run, whether the chosen parameters
-#' can be told apart by the data. Two Jacobians are analyzed numerically
+#' can be told apart by the data. Two Jacobians are analysed numerically
 #' at the current calibration, in the spirit of Iskrev (2010):
 #'
 #' * **solution level**: derivatives of the solved transition, shock

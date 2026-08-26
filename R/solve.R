@@ -56,7 +56,9 @@ qpm_solve <- function(model, tol = 1e-7) {
 #   A x_{t+1} + B x_t + C x_{t-1} + D eps_t + const = 0
 # by introducing auxiliary states v.Lk (lags) and v.Fk (leads).
 build_first_order <- function(model) {
-  co <- lapply(model$parsed, eq_coefficients, params = model$params)
+  parenv <- list2env(as.list(model$params), parent = baseenv())
+  co <- lapply(model$parsed, eq_coefficients, params = model$params,
+               parenv = parenv)
   varnames <- model$vars$name
 
   inc <- do.call(rbind, lapply(seq_along(co), function(i) {

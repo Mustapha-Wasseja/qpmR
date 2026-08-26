@@ -1,6 +1,13 @@
-# qpmR (development version)
+# qpmR 1.0.0
 
-The 1.0 reporting and audit layer, plus country-adaptation blocks.
+First stable release. The full forecasting-and-policy-analysis workflow
+now runs end to end — data, filtering, gaps, model, baseline, judgment,
+policy, scenarios, rounds, revisions, verification, report — and is
+exercised on a real quarterly dataset for Czechia shipped with the
+package.
+
+This release adds the reporting and audit layer and country-adaptation
+blocks on top of 0.4.
 
 ## Reporting and audit
 
@@ -79,6 +86,8 @@ The estimation layer is complete.
   laboratory, identification, Bayes factors, and the full Czech
   estimation with its results discussed (including the honestly
   weakly-identified policy-response coefficient).
+
+## Priors, sampler, posterior forecasts
 
 * `priors()`: the prior mini-language. `normal()`, `beta()`, `gamma()`,
   `invgamma()`, `uniform()`, and `truncate()` exist only inside
@@ -220,7 +229,7 @@ The filtration layer is complete.
 
 * Filtration and decomposition charts label the time axis with period
   labels; `plot()` on decompositions gains a `periods` window argument.
-* Extended qualitative palette (no more color recycling with many
+* Extended qualitative palette (no more colour recycling with many
   shocks).
 
 # qpmR 0.1.0

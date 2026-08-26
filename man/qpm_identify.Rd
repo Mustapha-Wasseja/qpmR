@@ -26,7 +26,7 @@ singular values, and flagged parameters; printed as a verdict list.
 }
 \description{
 Checks, before any estimation is run, whether the chosen parameters
-can be told apart by the data. Two Jacobians are analyzed numerically
+can be told apart by the data. Two Jacobians are analysed numerically
 at the current calibration, in the spirit of Iskrev (2010):
 }
 \details{

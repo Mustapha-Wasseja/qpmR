@@ -99,11 +99,15 @@ parse_qpm_equation <- function(f, varnames, shknames, parnames, eq_label) {
 
 # Exact numeric coefficient extraction for one parsed equation, given the
 # current parameter values.
-eq_coefficients <- function(peq, params) {
+eq_coefficients <- function(peq, params, parenv = NULL) {
   syms <- c(peq$vars$canon, peq$shocks$canon)
-  parenv <- list2env(as.list(params), parent = baseenv())
+  # the parameter environment is built once per model and the evaluation
+  # environment once per equation: coefficient extraction evaluates each
+  # equation once per symbol, and qpm_solve() runs inside every MCMC draw
+  if (is.null(parenv)) parenv <- list2env(as.list(params), parent = baseenv())
+  ev <- new.env(parent = parenv)
   evalf <- function(vals) {
-    ev <- list2env(as.list(vals), parent = parenv)
+    list2env(as.list(vals), envir = ev)
     out <- eval(peq$expr, envir = ev)
     if (!is.numeric(out) || length(out) != 1L)
       stop(sprintf("equation %s does not evaluate to a scalar", peq$label),

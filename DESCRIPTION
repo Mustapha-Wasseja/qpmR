@@ -1,21 +1,27 @@
 Package: qpmR
 Title: Quarterly Projection Models for Monetary Policy Analysis
-Version: 0.4.0
+Version: 1.0.0
 Authors@R:
     person("Mustapha", "Mohammed", email = "muswaseja@gmail.com",
            role = c("aut", "cre"))
-Description: Build, solve, and simulate the semi-structural quarterly
-    projection models (QPM) used in central-bank forecasting and policy
-    analysis systems (FPAS). Provides a native R language for declaring
-    gap-form models with model-consistent expectations, automatic handling
-    of long lags and leads via auxiliary states, a generalized Schur (QZ)
-    solver with Blanchard-Kahn diagnostics, steady-state computation,
-    impulse responses, stochastic simulation, and unconditional forecasts
-    with uncertainty bands. Ships the canonical small-open-economy model of
-    Berg, Karam and Laxton (2006), IMF Working Paper 06/81, as a calibrated
-    template.
+Description: An end-to-end implementation of the semi-structural quarterly
+    projection models used in central-bank forecasting and policy analysis
+    systems: model declaration with model-consistent expectations, a
+    generalized Schur solver with Blanchard-Kahn diagnostics following
+    Klein (2000) <doi:10.1016/S0165-1889(99)00045-7>, Kalman filtering and
+    smoothing for latent states such as the output gap and the neutral
+    rate, historical shock decompositions, conditional forecasts that
+    distinguish announced from unanticipated policy paths, an auditable
+    judgment ledger, forecast rounds with revision decompositions,
+    Bayesian estimation with identification diagnostics following
+    Iskrev (2010) <doi:10.1016/j.jmoneco.2009.12.007>, and reporting.
+    The canonical small open economy model of Berg, Karam and Laxton
+    (2006, International Monetary Fund Working Paper 06/81) ships as a
+    calibrated template, with extension blocks for disaggregated food
+    inflation and managed exchange rates.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Language: en-GB
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
@@ -24,7 +30,9 @@ Imports:
     QZ,
     stats,
     graphics,
-    grDevices
+    grDevices,
+    tools,
+    utils
 Suggests:
     quarto,
     testthat (>= 3.0.0),
