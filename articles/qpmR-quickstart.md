@@ -334,7 +334,7 @@ judged <- add_judgment(base, pi4 = stats::setNames(0.4, base$periods[3]),
 judgment_log(judged)
 #> <judgment ledger> 1 entry
 #>  id time             author      variable period  add   target
-#>  1  2026-08-26 18:55 prices desk pi4      2027-Q1 +0.40 2.5   
+#>  1  2026-08-26 20:31 prices desk pi4      2027-Q1 +0.40 2.5   
 #>  rationale                       
 #>  announced energy-tariff increase
 #>   implied shocks, max |sd|: eps_y 0.04, eps_pi 0.20, eps_i 0.04, eps_q 0.09, eps_qbar 0.01, eps_rbar 0.01, eps_ystar 0.01, eps_istar 0.03, eps_pistar 0.02, eps_prem 0.05
