@@ -245,6 +245,12 @@
 <p>Across <strong>4080 impulse-response points</strong> (12 shocks x 17 variables x 20 quarters) the largest discrepancy is <strong>1.4e-14</strong>, with steady states agreeing to 8e-14. The food-block model agrees to 1.7e-14, which also validates <code><a href="reference/add_block.html">add_block()</a></code> independently — Dynare parses the original equations and builds its own auxiliary variables, so the two implementations agree only if both handle long leads and lags correctly. Regenerate the golden files with <code>data-raw/dynare_golden.R</code>.</p>
 </div>
 <div class="section level2">
+<h2 id="speed">Speed<a class="anchor" aria-label="anchor" href="#speed"></a>
+</h2>
+<p>The Kalman filter and the stationary-covariance solve are compiled (RcppArmadillo). Both keep reference implementations in R, and the test suite pins the compiled paths to them to machine precision — that agreement is what makes the fast path trustworthy. Use <code>options(qpmR.use_cpp = FALSE)</code> to fall back to R.</p>
+<p>A posterior draw on the Czech model (22 states, 110 quarters) costs 73 ms, against 181 ms in pure R, so a 6000-draw estimate takes about seven minutes rather than eighteen. The largest single gain was not the filter but replacing the <code>O(N^6)</code> Kronecker solution of the Lyapunov equation with <code>O(N^3)</code> squaring: 39x on that step alone, and it also speeds up <code><a href="reference/model_properties.html">model_properties()</a></code>, <code><a href="reference/qpm_rule_eval.html">qpm_rule_eval()</a></code> and <code><a href="reference/qpm_identify.html">qpm_identify()</a></code>.</p>
+</div>
+<div class="section level2">
 <h2 id="testing">Testing<a class="anchor" aria-label="anchor" href="#testing"></a>
 </h2>
 <p>466 assertions across 18 files, at <strong>87.7% line coverage</strong> — measured on every push by the <code>test-coverage</code> workflow. The suite pins the solver to analytic solutions (AR(1), hybrid roots, brute-force perfect foresight), the Kalman filter to the exact closed-form Gaussian likelihood, the revision decomposition to exact telescoping, and the whole solver to Dynare (above).</p>

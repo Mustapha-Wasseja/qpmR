@@ -2,6 +2,36 @@
 
 ## qpmR (development version)
 
+### Speed
+
+- A compiled (C++/RcppArmadillo) Kalman filter, used by default. It is a
+  line-for-line match of the reference implementation kept in R, down to
+  the Cholesky factorisation and Joseph-form update, and the two are
+  tested to agree to machine precision on real data, with missing
+  observations, with measurement error, and on the collinear case that
+  raises `qpm_singular_F`. Set `options(qpmR.use_cpp = FALSE)` to force
+  the R path;
+  [`qpm_use_cpp()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_use_cpp.md)
+  reports which is in use.
+- The stationary covariance is now obtained by squaring rather than by
+  vectorising to an `N^2 x N^2` system — O(N^3) per iteration instead of
+  O(N^6). This turned out to matter more than the filter: it is **39x
+  faster** on the Czech model and also speeds up
+  [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md),
+  [`qpm_rule_eval()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)
+  and
+  [`qpm_identify()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_identify.md),
+  which all solve the same equation.
+- Coefficient extraction reuses one evaluation environment per equation
+  instead of rebuilding it per symbol.
+- Together these take a posterior draw on the Czech model (22 states,
+  110 quarters) from 181 ms to 73 ms — **2.5x end to end**, or a
+  6000-draw estimate from about 18 minutes to 7. Profiling now puts the
+  remaining time in `build_first_order()`, not in linear algebra: the QZ
+  decomposition itself is only 3.5 ms of a 37 ms solve.
+
+### New features
+
 - [`qpm_risk()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_risk.md)
   /
   [`risk_log()`](https://mustapha-wasseja.github.io/qpmR/reference/risk_log.md):

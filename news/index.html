@@ -39,6 +39,15 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="qpmr-development-version">qpmR (development version)<a class="anchor" aria-label="anchor" href="#qpmr-development-version"></a></h2>
+<div class="section level3">
+<h3 id="speed-development-version">Speed<a class="anchor" aria-label="anchor" href="#speed-development-version"></a></h3>
+<ul><li>A compiled (C++/RcppArmadillo) Kalman filter, used by default. It is a line-for-line match of the reference implementation kept in R, down to the Cholesky factorisation and Joseph-form update, and the two are tested to agree to machine precision on real data, with missing observations, with measurement error, and on the collinear case that raises <code>qpm_singular_F</code>. Set <code>options(qpmR.use_cpp = FALSE)</code> to force the R path; <code><a href="../reference/qpm_use_cpp.html">qpm_use_cpp()</a></code> reports which is in use.</li>
+<li>The stationary covariance is now obtained by squaring rather than by vectorising to an <code>N^2 x N^2</code> system — O(N^3) per iteration instead of O(N^6). This turned out to matter more than the filter: it is <strong>39x faster</strong> on the Czech model and also speeds up <code><a href="../reference/model_properties.html">model_properties()</a></code>, <code><a href="../reference/qpm_rule_eval.html">qpm_rule_eval()</a></code> and <code><a href="../reference/qpm_identify.html">qpm_identify()</a></code>, which all solve the same equation.</li>
+<li>Coefficient extraction reuses one evaluation environment per equation instead of rebuilding it per symbol.</li>
+<li>Together these take a posterior draw on the Czech model (22 states, 110 quarters) from 181 ms to 73 ms — <strong>2.5x end to end</strong>, or a 6000-draw estimate from about 18 minutes to 7. Profiling now puts the remaining time in <code>build_first_order()</code>, not in linear algebra: the QZ decomposition itself is only 3.5 ms of a 37 ms solve.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="new-features-development-version">New features<a class="anchor" aria-label="anchor" href="#new-features-development-version"></a></h3>
 <ul><li>
 <code><a href="../reference/qpm_risk.html">qpm_risk()</a></code> / <code><a href="../reference/risk_log.html">risk_log()</a></code>: express a balance of risks. Bands become two-piece normal, so the <em>mode</em> stays on the model’s projection while the <em>mean</em> shifts by the stated skew and total variance is held fixed — a skew redistributes risk rather than adding it. Fan charts centred on the mode, as published fan charts are. Unlike <code><a href="../reference/add_judgment.html">add_judgment()</a></code>, which moves the projection and back-solves the supporting shocks, this changes only the shape of the distribution around an unchanged path.</li>
 <li>
@@ -59,6 +68,7 @@
 <li>A pkgdown website, with the reference index organised by workflow stage rather than alphabetically.</li>
 <li>Test coverage is measured on every push and reported to Codecov.</li>
 </ul></div>
+</div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="1.0.0" id="qpmr-100">qpmR 1.0.0<a class="anchor" aria-label="anchor" href="#qpmr-100"></a></h2>
 <p>First stable release. The full forecasting-and-policy-analysis workflow now runs end to end — data, filtering, gaps, model, baseline, judgment, policy, scenarios, rounds, revisions, verification, report — and is exercised on a real quarterly dataset for Czechia shipped with the package.</p>

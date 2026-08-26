@@ -119,7 +119,7 @@ qpm_identify(m_bad, params = c("a", "b"))
 #>       combinations involved: a, b
 #>   ! solution level: near-collinear pairs (only jointly identified): a ~ b (1.000)
 #>   x moment level (means + autocovariances to lag 3): rank 1 < 2 - parameters not separately identified
-#>       combinations involved: a, b
+#>       combinations involved: b, a
 #>   ! moment level (means + autocovariances to lag 3): near-collinear pairs (only jointly identified): a ~ b (1.000)
 ```
 

@@ -162,6 +162,11 @@ if it had been followed?
   [`plot(`*`<qpm_disaggregation>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_disaggregate.md)
   : Temporal disaggregation of low-frequency data
 
+## Configuration
+
+- [`qpm_use_cpp()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_use_cpp.md)
+  : Use the compiled Kalman filter
+
 ## Standard methods
 
 qpmR objects work with the usual R generics, so
