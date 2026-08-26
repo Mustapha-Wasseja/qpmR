@@ -22,13 +22,25 @@
   and
   [`qpm_identify()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_identify.md),
   which all solve the same equation.
+- The parameter-independent structure of the first-order system — which
+  auxiliary states are needed, the expanded state vector, and the exact
+  cell of `A`, `B`, `C` or `D` that each coefficient lands in — is now
+  computed once per model and cached on it. Estimation re-solves the
+  same equations thousands of times with different numbers, so only the
+  values are recomputed: `build_first_order()` went from 27.5 ms to 1.7
+  ms (**16x**) and
+  [`qpm_solve()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_solve.md)
+  from 37 ms to 8.3 ms. The cache is rebuilt automatically if it is
+  missing (a model serialised by an older version) or no longer matches
+  its equations. Linearity is checked once at construction rather than
+  on every solve, since it is a property of the equations.
 - Coefficient extraction reuses one evaluation environment per equation
   instead of rebuilding it per symbol.
 - Together these take a posterior draw on the Czech model (22 states,
-  110 quarters) from 181 ms to 73 ms — **2.5x end to end**, or a
-  6000-draw estimate from about 18 minutes to 7. Profiling now puts the
-  remaining time in `build_first_order()`, not in linear algebra: the QZ
-  decomposition itself is only 3.5 ms of a 37 ms solve.
+  110 quarters) from 181 ms to 27 ms — **6.7x end to end**, or a
+  6000-draw estimate from about 18 minutes to under 3. The compiled
+  filter is now the largest single cost, which is where the time should
+  be: the QZ decomposition is 3.5 ms and model assembly 1.7 ms.
 
 ### New features
 

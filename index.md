@@ -282,11 +282,21 @@ suite pins the compiled paths to them to machine precision — that
 agreement is what makes the fast path trustworthy. Use
 `options(qpmR.use_cpp = FALSE)` to fall back to R.
 
-A posterior draw on the Czech model (22 states, 110 quarters) costs 73
-ms, against 181 ms in pure R, so a 6000-draw estimate takes about seven
-minutes rather than eighteen. The largest single gain was not the filter
-but replacing the `O(N^6)` Kronecker solution of the Lyapunov equation
-with `O(N^3)` squaring: 39x on that step alone, and it also speeds up
+A posterior draw on the Czech model (22 states, 110 quarters) costs 27
+ms, against 181 ms before this work — so a 6000-draw estimate takes
+under three minutes rather than eighteen. Two of the three gains were
+not the filter:
+
+|                                      | before  | after  |
+|--------------------------------------|---------|--------|
+| model assembly (`build_first_order`) | 27.5 ms | 1.7 ms |
+| stationary covariance (Lyapunov)     | 39 ms   | 1 ms   |
+| Kalman filter                        | 55 ms   | 16 ms  |
+
+The structure of the first-order system does not depend on the
+parameters, so it is computed once per model and cached; and the
+Lyapunov equation is solved by `O(N^3)` squaring rather than the
+`O(N^6)` Kronecker system, which also speeds up
 [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md),
 [`qpm_rule_eval()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)
 and
