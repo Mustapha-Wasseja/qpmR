@@ -66,6 +66,8 @@ reference:
   - steady_state
   - eigen_table
   - irf
+  - fevd
+  - model_properties
   - simulate.qpm_solution
   - state_space
 
@@ -118,6 +120,18 @@ reference:
   contents:
   - qpm_report
   - chart_pack
+
+- title: Standard methods
+  desc: >
+    qpmR objects work with the usual R generics, so `AIC()`, `BIC()` and
+    ordinary data-frame workflows need no special handling.
+  contents:
+  - logLik.qpm_filtration
+  - nobs.qpm_filtration
+  - residuals.qpm_filtration
+  - vcov.qpm_estimate
+  - summary.qpm_estimate
+  - summary.qpm_filtration
 
 - title: Interoperability and data
   contents:
