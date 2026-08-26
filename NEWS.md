@@ -1,5 +1,28 @@
 # qpmR (development version)
 
+* `qpm_risk()` / `risk_log()`: express a balance of risks. Bands become
+  two-piece normal, so the *mode* stays on the model's projection while
+  the *mean* shifts by the stated skew and total variance is held fixed
+  — a skew redistributes risk rather than adding it. Fan charts centred
+  on the mode, as published fan charts are. Unlike `add_judgment()`,
+  which moves the projection and back-solves the supporting shocks, this
+  changes only the shape of the distribution around an unchanged path.
+* `qpm_rule_eval()`: score alternative policy rules over a grid by the
+  unconditional loss, computed exactly from the stationary covariance
+  rather than by simulation, and trace the inflation-output variability
+  frontier. Rules that fail Blanchard-Kahn are reported as
+  indeterminate or explosive rather than silently dropped.
+* `qpm_counterfactual()`: replay history with shocks switched off or
+  scaled — "what if the central bank had simply followed its rule?".
+  Replaying the unmodified shocks reproduces the smoothed history to
+  machine precision, which the function checks.
+* `qpm_compare_models()`: compare model *behaviour* (impulse responses
+  and implied moments), complementing `qpm_diff()`, which compares
+  structure.
+* `qpm_disaggregate()`: temporal disaggregation of annual data to
+  quarterly by Denton-Cholette or Chow-Lin, both satisfying the
+  aggregation constraint exactly — the first step for the many economies
+  that publish national accounts only annually.
 * `fevd()`: forecast error variance decomposition — how much of each
   variable's forecast uncertainty each structural shock accounts for, at
   every horizon. Shares sum to one by construction (verified to 1e-10 in

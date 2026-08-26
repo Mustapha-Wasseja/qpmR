@@ -46,6 +46,15 @@ test_that("fevd works on models with unit roots and accepts a model", {
   expect_s3_class(fevd(qpm_template("bkl"), horizon = 4), "qpm_fevd")
 })
 
+test_that("subsetting keeps printing sensible (attribute partial matching)", {
+  fv <- fevd(sol, horizon = 6, vars = "pi")
+  out <- utils::capture.output(print(fv[1:5, ]))
+  expect_true(any(grepl("Canonical small open economy", out)))
+  p <- model_properties(sol, vars = c("pi", "i"))
+  out2 <- utils::capture.output(print(p[1, ]))
+  expect_true(any(grepl("Canonical small open economy", out2)))
+})
+
 test_that("fevd printing, plotting and argument checks behave", {
   fv <- fevd(sol, horizon = 8, vars = c("pi", "i"), shocks = c("eps_pi", "eps_i"))
   expect_setequal(unique(fv$variable), c("pi", "i"))

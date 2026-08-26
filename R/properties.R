@@ -99,7 +99,7 @@ model_properties <- function(x, data = NULL, vars = NULL, lags = c(1, 4)) {
 #' @export
 print.qpm_properties <- function(x, digits = 2, ...) {
   df <- as.data.frame(x)
-  cat(sprintf("<qpm_properties> %s\n", attr(x, "name")))
+  cat(sprintf("<qpm_properties> %s\n", attr(x, "name", exact = TRUE)))
   if (!attr(x, "stationary")) {
     cat("  i the model has unit roots, so population moments do not exist;\n")
     cat("    only the data moments are shown (use fevd() for variance shares)\n")

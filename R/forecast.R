@@ -76,7 +76,7 @@ qpm_forecast <- function(object, from = NULL, horizon = 12,
                  dev = mean_path, sd_uncond = sd_path,
                  baseline_dev = NULL, conditions = NULL, judgment = NULL,
                  shocks_implied = NULL, anticipated = NULL,
-                 instruments = NULL, scenario = NULL),
+                 instruments = NULL, scenario = NULL, risk = NULL),
             class = "qpm_forecast")
 }
 
@@ -133,6 +133,12 @@ print.qpm_forecast <- function(x, ...) {
   if (!is.null(x$judgment) && nrow(x$judgment))
     cat(sprintf("  judgment: %d entr%s (see judgment_log())\n",
                 nrow(x$judgment), if (nrow(x$judgment) == 1L) "y" else "ies"))
+  if (!is.null(x$risk) && nrow(x$risk)) {
+    cat(sprintf("  balance of risks: %d entr%s on %s (see risk_log())\n",
+                nrow(x$risk), if (nrow(x$risk) == 1L) "y" else "ies",
+                paste(unique(x$risk$variable), collapse = ", ")))
+    cat("    bands are two-piece normal; the central line is the mode\n")
+  }
   invisible(x)
 }
 
@@ -165,8 +171,11 @@ plot.qpm_forecast <- function(x, vars = NULL, ...) {
   T0 <- if (!is.null(hist)) nrow(hist) else 0L
   col_line <- "#1f5da8"
 
+  # with a balance of risks the fan is centred on the mode, not the mean
+  central <- if ("mode" %in% names(x$paths)) "mode" else "mean"
   for (v in vs) {
     d <- x$paths[x$paths$variable == v, , drop = FALSE]
+    d$mean <- d[[central]]
     hx <- T0 + d$h
     cn <- if (!is.null(x$conditions))
       x$conditions[x$conditions$variable == v, , drop = FALSE] else NULL

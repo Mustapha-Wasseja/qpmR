@@ -85,7 +85,7 @@ print.qpm_fevd <- function(x, horizons = NULL, ...) {
   df <- as.data.frame(x)
   H <- attr(x, "horizon")
   hs <- horizons %||% unique(pmin(c(1, 4, 8, H), H))
-  cat(sprintf("<qpm_fevd> %s - shares of forecast error variance\n", attr(x, "name")))
+  cat(sprintf("<qpm_fevd> %s - shares of forecast error variance\n", attr(x, "name", exact = TRUE)))
   cat(sprintf("  horizons %s; dominant shocks per variable:\n",
               paste(hs, collapse = ", ")))
   for (v in unique(df$variable)) {

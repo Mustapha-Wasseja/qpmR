@@ -89,6 +89,8 @@ reference:
   - qpm_scenario
   - add_judgment
   - judgment_log
+  - qpm_risk
+  - risk_log
   - posterior_forecast
 
 - title: Forecast rounds
@@ -120,6 +122,19 @@ reference:
   contents:
   - qpm_report
   - chart_pack
+
+- title: Policy experiments
+  desc: >
+    What if the rule were different, and what would history have looked
+    like if it had been followed?
+  contents:
+  - qpm_rule_eval
+  - qpm_counterfactual
+  - qpm_compare_models
+
+- title: Preparing data
+  contents:
+  - qpm_disaggregate
 
 - title: Standard methods
   desc: >
