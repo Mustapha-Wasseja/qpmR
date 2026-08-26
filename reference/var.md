@@ -47,5 +47,5 @@ vars(y_gap = var("Output gap", unit = "pp"))
 #>    name      label unit
 #> 1 y_gap Output gap   pp
 var(rnorm(10))  # still the sample variance
-#> [1] 1.575348
+#> [1] 0.9198397
 ```

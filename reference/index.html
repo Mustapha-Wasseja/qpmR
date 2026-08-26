@@ -192,6 +192,20 @@
 
         <dt>
 
+          <code><a href="fevd.html">fevd()</a></code> <code><a href="fevd.html">plot(<i>&lt;qpm_fevd&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Forecast error variance decomposition</dd>
+
+        <dt>
+
+          <code><a href="model_properties.html">model_properties()</a></code>
+
+        </dt>
+        <dd>Model-implied moments, and how they compare with the data</dd>
+
+        <dt>
+
           <code><a href="simulate.qpm_solution.html">simulate(<i>&lt;qpm_solution&gt;</i>)</a></code>
 
         </dt>
@@ -381,6 +395,57 @@
 
         </dt>
         <dd>The standard forecast-round chart pack</dd>
+      </dl></div><div class="section level2">
+      <h2 id="standard-methods">Standard methods<a class="anchor" aria-label="anchor" href="#standard-methods"></a></h2>
+
+      <div class="section-desc"><p>qpmR objects work with the usual R generics, so <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">AIC()</a></code>, <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">BIC()</a></code> and ordinary data-frame workflows need no special handling.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="logLik.qpm_filtration.html">logLik(<i>&lt;qpm_filtration&gt;</i>)</a></code> <code><a href="logLik.qpm_filtration.html">logLik(<i>&lt;qpm_estimate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Log-likelihood of a filtration or an estimate</dd>
+
+        <dt>
+
+          <code><a href="nobs.qpm_filtration.html">nobs(<i>&lt;qpm_filtration&gt;</i>)</a></code> <code><a href="nobs.qpm_filtration.html">nobs(<i>&lt;qpm_estimate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Number of observations</dd>
+
+        <dt>
+
+          <code><a href="residuals.qpm_filtration.html">residuals(<i>&lt;qpm_filtration&gt;</i>)</a></code> <code><a href="residuals.qpm_filtration.html">fitted(<i>&lt;qpm_filtration&gt;</i>)</a></code>
+
+        </dt>
+        <dd>One-step-ahead prediction errors and fitted values</dd>
+
+        <dt>
+
+          <code><a href="vcov.qpm_estimate.html">vcov(<i>&lt;qpm_estimate&gt;</i>)</a></code> <code><a href="vcov.qpm_estimate.html">confint(<i>&lt;qpm_estimate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Posterior covariance and credible intervals</dd>
+
+        <dt>
+
+          <code><a href="summary.qpm_estimate.html">summary(<i>&lt;qpm_estimate&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarise an estimate</dd>
+
+        <dt>
+
+          <code><a href="summary.qpm_filtration.html">summary(<i>&lt;qpm_filtration&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Summarise a filtration</dd>
       </dl></div><div class="section level2">
       <h2 id="interoperability-and-data">Interoperability and data<a class="anchor" aria-label="anchor" href="#interoperability-and-data"></a></h2>
 

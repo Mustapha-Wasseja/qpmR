@@ -54,6 +54,11 @@ implies about transmission.
   : Generalized eigenvalues of a solved model
 - [`irf()`](https://mustapha-wasseja.github.io/qpmR/reference/irf.md) :
   Impulse response functions
+- [`fevd()`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md)
+  [`plot(`*`<qpm_fevd>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md)
+  : Forecast error variance decomposition
+- [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md)
+  : Model-implied moments, and how they compare with the data
 - [`simulate(`*`<qpm_solution>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/simulate.qpm_solution.md)
   : Simulate a solved model
 - [`state_space()`](https://mustapha-wasseja.github.io/qpmR/reference/state_space.md)
@@ -131,6 +136,30 @@ The deliverables a policy round is discussed from.
   : Write (and optionally render) a monetary policy report
 - [`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)
   : The standard forecast-round chart pack
+
+## Standard methods
+
+qpmR objects work with the usual R generics, so
+[`AIC()`](https://rdrr.io/r/stats/AIC.html),
+[`BIC()`](https://rdrr.io/r/stats/AIC.html) and ordinary data-frame
+workflows need no special handling.
+
+- [`logLik(`*`<qpm_filtration>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/logLik.qpm_filtration.md)
+  [`logLik(`*`<qpm_estimate>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/logLik.qpm_filtration.md)
+  : Log-likelihood of a filtration or an estimate
+- [`nobs(`*`<qpm_filtration>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/nobs.qpm_filtration.md)
+  [`nobs(`*`<qpm_estimate>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/nobs.qpm_filtration.md)
+  : Number of observations
+- [`residuals(`*`<qpm_filtration>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/residuals.qpm_filtration.md)
+  [`fitted(`*`<qpm_filtration>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/residuals.qpm_filtration.md)
+  : One-step-ahead prediction errors and fitted values
+- [`vcov(`*`<qpm_estimate>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/vcov.qpm_estimate.md)
+  [`confint(`*`<qpm_estimate>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/vcov.qpm_estimate.md)
+  : Posterior covariance and credible intervals
+- [`summary(`*`<qpm_estimate>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/summary.qpm_estimate.md)
+  : Summarise an estimate
+- [`summary(`*`<qpm_filtration>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/summary.qpm_filtration.md)
+  : Summarise a filtration
 
 ## Interoperability and data
 

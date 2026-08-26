@@ -2,6 +2,31 @@
 
 ## qpmR (development version)
 
+- [`fevd()`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md):
+  forecast error variance decomposition — how much of each variable’s
+  forecast uncertainty each structural shock accounts for, at every
+  horizon. Shares sum to one by construction (verified to 1e-10 in the
+  tests), exogenous processes come back as entirely own-driven, and the
+  decomposition is well defined for unit-root models even though the
+  variances themselves are not.
+- [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md):
+  the standard calibration check — model-implied standard deviations and
+  autocorrelations from the stationary covariance, the shock dominating
+  each variable’s unconditional variance, and the same statistics
+  computed from data alongside, with a warning when model and data
+  volatility differ by more than a factor of two.
+- Standard R generics on qpmR objects, so nothing has to be
+  reimplemented: [`logLik()`](https://rdrr.io/r/stats/logLik.html) and
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html) for filtrations and
+  estimates (which makes [`AIC()`](https://rdrr.io/r/stats/AIC.html) and
+  [`BIC()`](https://rdrr.io/r/stats/AIC.html) work),
+  [`residuals()`](https://rdrr.io/r/stats/residuals.html) (one-step
+  innovations, standardised innovations, or smoothed structural shocks)
+  and [`fitted()`](https://rdrr.io/r/stats/fitted.values.html) for
+  filtrations, [`vcov()`](https://rdrr.io/r/stats/vcov.html) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html) for estimates, and
+  [`summary()`](https://rdrr.io/r/base/summary.html) methods returning
+  data frames for both.
 - [`write_dynare()`](https://mustapha-wasseja.github.io/qpmR/reference/write_dynare.md):
   export any model as a Dynare `.mod` file. The original equations are
   exported rather than qpmR’s internal first-order system, so Dynare
