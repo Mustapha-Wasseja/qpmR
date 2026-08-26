@@ -402,6 +402,10 @@ judgment as a logged and auditable operation.
   : Add logged judgment to a forecast
 - [`judgment_log()`](https://mustapha-wasseja.github.io/qpmR/reference/judgment_log.md)
   : Print a forecast's judgment ledger
+- [`qpm_risk()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_risk.md)
+  : Express a balance of risks (skewed fan charts)
+- [`risk_log()`](https://mustapha-wasseja.github.io/qpmR/reference/risk_log.md)
+  : Print a forecast's balance-of-risks assessment
 - [`posterior_forecast()`](https://mustapha-wasseja.github.io/qpmR/reference/posterior_forecast.md)
   : Forecast with parameter uncertainty (posterior fan)
 
@@ -448,6 +452,27 @@ The deliverables a policy round is discussed from.
   : Write (and optionally render) a monetary policy report
 - [`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)
   : The standard forecast-round chart pack
+
+## Policy experiments
+
+What if the rule were different, and what would history have looked like
+if it had been followed?
+
+- [`qpm_rule_eval()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)
+  [`plot(`*`<qpm_rule_eval>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)
+  : Evaluate alternative policy rules
+- [`qpm_counterfactual()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_counterfactual.md)
+  [`plot(`*`<qpm_counterfactual>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_counterfactual.md)
+  : Historical counterfactuals
+- [`qpm_compare_models()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_compare_models.md)
+  [`plot(`*`<qpm_model_comparison>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_compare_models.md)
+  : Compare the behaviour of two or more models
+
+## Preparing data
+
+- [`qpm_disaggregate()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_disaggregate.md)
+  [`plot(`*`<qpm_disaggregation>`*`)`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_disaggregate.md)
+  : Temporal disaggregation of low-frequency data
 
 ## Standard methods
 

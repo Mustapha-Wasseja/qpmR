@@ -40,6 +40,16 @@
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="qpmr-development-version">qpmR (development version)<a class="anchor" aria-label="anchor" href="#qpmr-development-version"></a></h2>
 <ul><li>
+<code><a href="../reference/qpm_risk.html">qpm_risk()</a></code> / <code><a href="../reference/risk_log.html">risk_log()</a></code>: express a balance of risks. Bands become two-piece normal, so the <em>mode</em> stays on the model’s projection while the <em>mean</em> shifts by the stated skew and total variance is held fixed — a skew redistributes risk rather than adding it. Fan charts centred on the mode, as published fan charts are. Unlike <code><a href="../reference/add_judgment.html">add_judgment()</a></code>, which moves the projection and back-solves the supporting shocks, this changes only the shape of the distribution around an unchanged path.</li>
+<li>
+<code><a href="../reference/qpm_rule_eval.html">qpm_rule_eval()</a></code>: score alternative policy rules over a grid by the unconditional loss, computed exactly from the stationary covariance rather than by simulation, and trace the inflation-output variability frontier. Rules that fail Blanchard-Kahn are reported as indeterminate or explosive rather than silently dropped.</li>
+<li>
+<code><a href="../reference/qpm_counterfactual.html">qpm_counterfactual()</a></code>: replay history with shocks switched off or scaled — “what if the central bank had simply followed its rule?”. Replaying the unmodified shocks reproduces the smoothed history to machine precision, which the function checks.</li>
+<li>
+<code><a href="../reference/qpm_compare_models.html">qpm_compare_models()</a></code>: compare model <em>behaviour</em> (impulse responses and implied moments), complementing <code><a href="../reference/qpm_diff.html">qpm_diff()</a></code>, which compares structure.</li>
+<li>
+<code><a href="../reference/qpm_disaggregate.html">qpm_disaggregate()</a></code>: temporal disaggregation of annual data to quarterly by Denton-Cholette or Chow-Lin, both satisfying the aggregation constraint exactly — the first step for the many economies that publish national accounts only annually.</li>
+<li>
 <code><a href="../reference/fevd.html">fevd()</a></code>: forecast error variance decomposition — how much of each variable’s forecast uncertainty each structural shock accounts for, at every horizon. Shares sum to one by construction (verified to 1e-10 in the tests), exogenous processes come back as entirely own-driven, and the decomposition is well defined for unit-root models even though the variances themselves are not.</li>
 <li>
 <code><a href="../reference/model_properties.html">model_properties()</a></code>: the standard calibration check — model-implied standard deviations and autocorrelations from the stationary covariance, the shock dominating each variable’s unconditional variance, and the same statistics computed from data alongside, with a warning when model and data volatility differ by more than a factor of two.</li>

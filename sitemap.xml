@@ -32,9 +32,12 @@
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpmR-package.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_block.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_calibrate.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_compare_models.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_condition.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_counterfactual.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_decompose.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_diff.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_disaggregate.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_estimate.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_filter.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_forecast.html</loc></url>
@@ -42,11 +45,14 @@
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_lint.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_model.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_report.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_risk.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_round.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_scenario.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_solve.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/qpm_template.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/residuals.qpm_filtration.html</loc></url>
+<url><loc>https://mustapha-wasseja.github.io/qpmR/reference/risk_log.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/save_round.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/shocks.html</loc></url>
 <url><loc>https://mustapha-wasseja.github.io/qpmR/reference/simulate.qpm_solution.html</loc></url>
