@@ -136,6 +136,10 @@ reference:
   contents:
   - qpm_disaggregate
 
+- title: Configuration
+  contents:
+  - qpm_use_cpp
+
 - title: Standard methods
   desc: >
     qpmR objects work with the usual R generics, so `AIC()`, `BIC()` and
