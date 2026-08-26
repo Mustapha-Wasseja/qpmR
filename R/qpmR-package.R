@@ -9,6 +9,8 @@
 #' fan bands via [qpm_forecast()].
 #'
 #' @keywords internal
+#' @useDynLib qpmR, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
 "_PACKAGE"
 
 # Canonical symbol separator used internally by the equation parser.

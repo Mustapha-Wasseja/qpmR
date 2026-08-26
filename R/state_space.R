@@ -82,8 +82,25 @@ state_space <- function(solution, observables = NULL, measurement_error = 0,
        diffuse = n_unit > 0L, n_unit = n_unit)
 }
 
-# Stationary covariance: V = T V T' + W, solved by vec(V) = (I - T (x) T)^-1 vec(W).
-solve_lyapunov <- function(Tt, W) {
+# Stationary covariance: V = T V T' + W.
+#
+# The compiled path squares its way to the answer in O(N^3) per iteration.
+# The reference path vectorises to (I - T (x) T) vec(V) = vec(W), which is
+# O(N^6) and only tractable for small models -- it is kept because the two
+# agreeing is what makes the fast path trustworthy.
+solve_lyapunov <- function(Tt, W, use_cpp = qpm_use_cpp()) {
+  if (use_cpp) {
+    res <- lyapunov_cpp(Tt, W)
+    if (isTRUE(res$converged)) return(res$V)
+    if (nrow(Tt) > 60)
+      stop("the Lyapunov iteration did not converge; the model may be explosive",
+           call. = FALSE)
+    # fall through to the direct solve for small models
+  }
+  solve_lyapunov_r(Tt, W)
+}
+
+solve_lyapunov_r <- function(Tt, W) {
   N <- nrow(Tt)
   V <- matrix(solve(diag(N * N) - kronecker(Tt, Tt), as.vector(W)), N, N)
   (V + t(V)) / 2
@@ -118,7 +135,7 @@ kalman_smooth <- function(m, Y) {
     Pp <- (Pp + t(Pp)) / 2
     a_p[[t + 1L]] <- ap; P_p[[t + 1L]] <- Pp
 
-    idx <- which(!is.na(Y[t, ]))
+    idx <- which(is.finite(Y[t, ]))
     if (length(idx) == 0L) {
       a_f[[t + 1L]] <- ap; P_f[[t + 1L]] <- Pp
       next
@@ -173,8 +190,44 @@ kalman_smooth <- function(m, Y) {
        innov = v_mat, innov_std = vstd_mat)
 }
 
+#' Use the compiled Kalman filter
+#'
+#' qpmR ships a compiled (C++) Kalman filter and an equivalent reference
+#' implementation in R. The compiled one is used by default because
+#' estimation runs it once per posterior draw; the R one is kept because
+#' the two agreeing to machine precision is what makes the compiled path
+#' trustworthy, and it is useful when debugging.
+#'
+#' Set `options(qpmR.use_cpp = FALSE)` to force the R implementation.
+#'
+#' @return `TRUE` if the compiled filter will be used.
+#' @examples
+#' qpm_use_cpp()
+#' @export
+qpm_use_cpp <- function() {
+  isTRUE(getOption("qpmR.use_cpp", TRUE))
+}
+
 # Likelihood-only Kalman filter (no storage, no smoother) for estimation.
-kalman_loglik <- function(m, Y) {
+# Dispatches to the compiled implementation unless it is switched off.
+kalman_loglik <- function(m, Y, use_cpp = qpm_use_cpp()) {
+  if (use_cpp) {
+    res <- kalman_loglik_cpp(m$T, m$R %*% m$Qc %*% t(m$R), m$Z,
+                             as.numeric(m$d), m$H, m$P1, Y)
+    if (res$fail > 0L)
+      stop(errorCondition(sprintf(paste0(
+        "innovation covariance is singular at period %d: some observables are ",
+        "exact combinations of others given the model (an identity links them).\n",
+        "  Drop one of the collinear observables or set a small measurement_error."),
+        res$fail),
+        class = c("qpm_singular_F", "qpm_error", "error", "condition")))
+    return(res$loglik)
+  }
+  kalman_loglik_r(m, Y)
+}
+
+# Reference implementation, kept for verification and debugging.
+kalman_loglik_r <- function(m, Y) {
   n <- nrow(Y); N <- nrow(m$T)
   Tt <- m$T; RQR <- m$R %*% m$Qc %*% t(m$R)
   a_f <- rep(0, N); P_f <- m$P1
@@ -183,7 +236,7 @@ kalman_loglik <- function(m, Y) {
     ap <- as.numeric(Tt %*% a_f)
     Pp <- Tt %*% P_f %*% t(Tt) + RQR
     Pp <- (Pp + t(Pp)) / 2
-    idx <- which(!is.na(Y[t, ]))
+    idx <- which(is.finite(Y[t, ]))
     if (length(idx) == 0L) { a_f <- ap; P_f <- Pp; next }
     Zt <- m$Z[idx, , drop = FALSE]
     Ht <- m$H[idx, idx, drop = FALSE]

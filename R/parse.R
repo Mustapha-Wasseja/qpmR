@@ -114,15 +114,25 @@ eq_coefficients <- function(peq, params, parenv = NULL) {
            call. = FALSE)
     as.numeric(out)
   }
-  zero <- stats::setNames(rep(0, length(syms)), syms)
-  const <- evalf(zero)
+  # Coefficients come from evaluating the equation once per symbol, and this
+  # runs inside every posterior draw, so the environment is built once and
+  # each symbol is toggled in place rather than rebuilt from a named vector.
+  for (s in syms) assign(s, 0, envir = ev)
+  const <- eval(peq$expr, envir = ev)
+  if (!is.numeric(const) || length(const) != 1L)
+    stop(sprintf("equation %s does not evaluate to a scalar", peq$label),
+         call. = FALSE)
+  const <- as.numeric(const)
   if (!is.finite(const))
     stop(sprintf("equation %s evaluates to a non-finite value; check parameters",
                  peq$label), call. = FALSE)
-  coefs <- vapply(syms, function(s) {
-    v <- zero; v[s] <- 1
-    evalf(v) - const
-  }, numeric(1))
+  coefs <- numeric(length(syms))
+  names(coefs) <- syms
+  for (j in seq_along(syms)) {
+    assign(syms[j], 1, envir = ev)
+    coefs[j] <- as.numeric(eval(peq$expr, envir = ev)) - const
+    assign(syms[j], 0, envir = ev)
+  }
 
   if (length(syms)) {
     # deterministic pseudo-random test point (avoids touching the RNG)

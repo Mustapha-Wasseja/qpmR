@@ -239,6 +239,21 @@ equations and builds its own auxiliary variables, so the two
 implementations agree only if both handle long leads and lags correctly.
 Regenerate the golden files with `data-raw/dynare_golden.R`.
 
+## Speed
+
+The Kalman filter and the stationary-covariance solve are compiled
+(RcppArmadillo). Both keep reference implementations in R, and the test
+suite pins the compiled paths to them to machine precision — that
+agreement is what makes the fast path trustworthy. Use
+`options(qpmR.use_cpp = FALSE)` to fall back to R.
+
+A posterior draw on the Czech model (22 states, 110 quarters) costs
+73 ms, against 181 ms in pure R, so a 6000-draw estimate takes about
+seven minutes rather than eighteen. The largest single gain was not the
+filter but replacing the `O(N^6)` Kronecker solution of the Lyapunov
+equation with `O(N^3)` squaring: 39x on that step alone, and it also
+speeds up `model_properties()`, `qpm_rule_eval()` and `qpm_identify()`.
+
 ## Testing
 
 466 assertions across 18 files, at **87.7% line coverage** — measured on

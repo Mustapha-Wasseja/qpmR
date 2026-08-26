@@ -27,12 +27,16 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Depends: R (>= 4.1)
 Imports:
+    Rcpp,
     QZ,
     stats,
     graphics,
     grDevices,
     tools,
     utils
+LinkingTo:
+    Rcpp,
+    RcppArmadillo
 Suggests:
     quarto,
     testthat (>= 3.0.0),
