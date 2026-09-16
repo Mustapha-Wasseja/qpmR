@@ -15,7 +15,8 @@
 #' unrendered rather than failing.
 #'
 #' @param round A `qpm_round`.
-#' @param file Output path. The extension chooses the format
+#' @param file Output path; required, so that nothing is written unless a
+#'   location is named. The extension chooses the format
 #'   (`.html`, `.pdf`, `.docx`), or `.Rmd` to write the source only.
 #' @param compare_to Optional previous `qpm_round` (or its name) to add
 #'   a revision-decomposition section.
@@ -33,11 +34,14 @@
 #' r <- qpm_round("demo", m, obs[, c("period", "pi", "i", "q")], horizon = 8)
 #' src <- qpm_report(r, file.path(tempdir(), "mpr.Rmd"), render = FALSE)
 #' @export
-qpm_report <- function(round, file = "mpr.html", compare_to = NULL,
+qpm_report <- function(round, file, compare_to = NULL,
                        store = "rounds", render = TRUE,
                        engine = c("auto", "quarto", "rmarkdown"),
                        quiet = TRUE) {
   stopifnot(inherits(round, "qpm_round"))
+  if (missing(file) || !is.character(file) || length(file) != 1L)
+    stop("file must be a single output path ending in .html, .pdf, .docx or .Rmd",
+         call. = FALSE)
   engine <- match.arg(engine)
   if (is.character(compare_to)) compare_to <- load_round(compare_to, store)
   if (!is.null(compare_to) && !inherits(compare_to, "qpm_round"))

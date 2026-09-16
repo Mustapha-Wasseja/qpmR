@@ -11,7 +11,8 @@
 
 \item{nsim}{Number of quarters to simulate.}
 
-\item{seed}{Optional seed for reproducibility.}
+\item{seed}{Optional seed for reproducibility. The previous RNG state
+is restored on exit.}
 
 \item{sigma}{Optional named vector of shock standard deviations
 overriding the model's.}

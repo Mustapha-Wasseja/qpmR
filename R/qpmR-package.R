@@ -27,3 +27,16 @@ utils::globalVariables(c("eps_y", "eps_pi", "eps_i", "eps_q", "eps_qbar",
                          "eps_rbar", "eps_g", "eps_dy", "eps_ystar",
                          "eps_istar", "eps_pistar", "eps_prem",
                          "eps_pifood", "eps_fx", "eps_x", "e"))
+
+# Restore the random number generator to the state captured before a
+# user-supplied seed was set, so that a seeded call does not disturb the
+# caller's random stream (the pattern used by stats:::simulate.lm).
+restore_rng <- function(old) {
+  if (is.null(old)) {
+    if (exists(".Random.seed", envir = globalenv(), inherits = FALSE))
+      rm(".Random.seed", envir = globalenv())
+  } else {
+    assign(".Random.seed", old, envir = globalenv())
+  }
+  invisible(NULL)
+}

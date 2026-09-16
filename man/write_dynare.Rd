@@ -4,12 +4,13 @@
 \alias{write_dynare}
 \title{Export a model to a Dynare .mod file}
 \usage{
-write_dynare(model, file = "model.mod", irf = 40, order = 1, extra = NULL)
+write_dynare(model, file = NULL, irf = 40, order = 1, extra = NULL)
 }
 \arguments{
 \item{model}{A \code{qpm_model}.}
 
-\item{file}{Output path. \code{NULL} returns the text instead of writing.}
+\item{file}{Output path. The default \code{NULL} returns the Dynare source as
+a character vector; a file is written only when a path is given.}
 
 \item{irf}{Horizon for \code{stoch_simul}; \code{0} omits impulse responses.}
 

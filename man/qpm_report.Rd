@@ -6,7 +6,7 @@
 \usage{
 qpm_report(
   round,
-  file = "mpr.html",
+  file,
   compare_to = NULL,
   store = "rounds",
   render = TRUE,
@@ -17,7 +17,8 @@ qpm_report(
 \arguments{
 \item{round}{A \code{qpm_round}.}
 
-\item{file}{Output path. The extension chooses the format
+\item{file}{Output path; required, so that nothing is written unless a
+location is named. The extension chooses the format
 (\code{.html}, \code{.pdf}, \code{.docx}), or \code{.Rmd} to write the source only.}
 
 \item{compare_to}{Optional previous \code{qpm_round} (or its name) to add

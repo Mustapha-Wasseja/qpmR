@@ -6,7 +6,7 @@
 \alias{list_rounds}
 \title{Save, load, and list forecast rounds}
 \usage{
-save_round(round, store = "rounds", overwrite = FALSE)
+save_round(round, store, overwrite = FALSE)
 
 load_round(name, store = "rounds")
 
@@ -15,7 +15,10 @@ list_rounds(store = "rounds")
 \arguments{
 \item{round}{A \code{qpm_round}.}
 
-\item{store}{Directory of the round store (created if missing).}
+\item{store}{Directory of the round store. \code{save_round()} creates it if
+missing and has no default, so nothing is written unless you name the
+location; the reading functions default to a \code{"rounds"} directory
+under the working directory.}
 
 \item{overwrite}{Allow replacing an existing round of the same name.}
 

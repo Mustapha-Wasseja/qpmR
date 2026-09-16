@@ -14,7 +14,8 @@
 #' expectations.
 #'
 #' @param model A `qpm_model`.
-#' @param file Output path. `NULL` returns the text instead of writing.
+#' @param file Output path. The default `NULL` returns the Dynare source as
+#'   a character vector; a file is written only when a path is given.
 #' @param irf Horizon for `stoch_simul`; `0` omits impulse responses.
 #' @param order Approximation order passed to `stoch_simul` (the models
 #'   are linear, so first order is exact).
@@ -26,7 +27,7 @@
 #' src <- write_dynare(qpm_template("bkl"), file = NULL)
 #' cat(head(src, 15), sep = "\n")
 #' @export
-write_dynare <- function(model, file = "model.mod", irf = 40, order = 1,
+write_dynare <- function(model, file = NULL, irf = 40, order = 1,
                          extra = NULL) {
   stopifnot(inherits(model, "qpm_model"))
   nms <- c(model$vars$name, model$shocks, names(model$params))

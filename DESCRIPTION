@@ -1,6 +1,6 @@
 Package: qpmR
 Title: Quarterly Projection Models for Monetary Policy Analysis
-Version: 1.0.0.9000
+Version: 1.1.0
 Authors@R:
     person("Mustapha", "Mohammed", email = "mustapha.wasseja.mohammed@gmail.com",
            role = c("aut", "cre"))
@@ -16,9 +16,9 @@ Description: An end-to-end implementation of the semi-structural quarterly
     Bayesian estimation with identification diagnostics following
     Iskrev (2010) <doi:10.1016/j.jmoneco.2009.12.007>, and reporting.
     The canonical small open economy model of Berg, Karam and Laxton
-    (2006, International Monetary Fund Working Paper 06/81) ships as a
-    calibrated template, with extension blocks for disaggregated food
-    inflation and managed exchange rates.
+    (2006) <doi:10.5089/9781451863413.001> ships as a calibrated
+    template, with extension blocks for disaggregated food inflation and
+    managed exchange rates.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Language: en-GB

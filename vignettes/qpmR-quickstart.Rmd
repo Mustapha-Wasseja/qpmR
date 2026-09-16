@@ -249,10 +249,15 @@ qpm_report(rB, "mpr.html", compare_to = rA)
 the principle that institutions replace the template's *text*, not its
 plumbing.
 
-## Where this is going
+## Where to go next
 
 Estimation — priors, posterior sampling on the filter likelihood,
 identification diagnostics, marginal likelihoods, and posterior fan
-charts — is covered in `vignette("qpmR-estimation")`. Next on the
-roadmap: the full FPAS reporting workflow (Quarto report templates,
-chart packs). See the README.
+charts — is covered in `vignette("qpmR-estimation")`. The policy
+experiments build on the same objects: `qpm_rule_eval()` scores
+alternative rules on the inflation-output variability frontier,
+`qpm_counterfactual()` replays history with shocks switched off,
+`qpm_compare_models()` sets two models' impulse responses and moments
+side by side, and `fevd()` and `model_properties()` report which shocks
+drive which variables. `write_dynare()` exports any model as a `.mod`
+file for an independent check in Dynare.

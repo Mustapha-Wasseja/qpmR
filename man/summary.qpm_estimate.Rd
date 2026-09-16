@@ -28,7 +28,7 @@ m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
                params = list(rho = 0.5))
 obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 120, seed = 1)
 est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2)),
-                    iter = 600, chains = 2, seed = 2, verbose = FALSE)
+                    iter = 300, chains = 1, seed = 2, verbose = FALSE)
 summary(est)
 }
 }

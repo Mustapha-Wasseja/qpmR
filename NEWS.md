@@ -1,4 +1,4 @@
-# qpmR (development version)
+# qpmR 1.1.0
 
 ## Speed
 
@@ -90,6 +90,22 @@
 * A pkgdown website, with the reference index organised by workflow
   stage rather than alphabetically.
 * Test coverage is measured on every push and reported to Codecov.
+
+## Smaller changes
+
+* `write_dynare()` no longer writes a file by default: `file = NULL` (the
+  new default) returns the Dynare source as a character vector, and a
+  file is written only when a path is given. `qpm_report()` and
+  `save_round()` likewise require an output path and a store directory
+  rather than defaulting to the working directory.
+* `qpm_estimate()` reports progress with `message()` rather than `cat()`,
+  so `suppressMessages()` silences it.
+* A `seed` given to `simulate()` or `qpm_estimate()` no longer disturbs
+  the caller's random number stream: the previous RNG state is restored
+  on exit, as `stats::simulate()` does for linear models.
+* The Description cites the Berg, Karam and Laxton (2006) how-to guide by
+  DOI, and the slower `\donttest{}` examples were resized to run in a few
+  seconds each.
 
 # qpmR 1.0.0
 

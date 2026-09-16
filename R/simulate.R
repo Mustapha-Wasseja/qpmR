@@ -7,7 +7,8 @@
 #'
 #' @param object A `qpm_solution`.
 #' @param nsim Number of quarters to simulate.
-#' @param seed Optional seed for reproducibility.
+#' @param seed Optional seed for reproducibility. The previous RNG state
+#'   is restored on exit.
 #' @param sigma Optional named vector of shock standard deviations
 #'   overriding the model's.
 #' @param burn Burn-in quarters discarded from the start.
@@ -23,7 +24,11 @@
 #' @export
 simulate.qpm_solution <- function(object, nsim = 40, seed = NULL,
                                   sigma = NULL, burn = 0, ...) {
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    old_rng <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
+    on.exit(restore_rng(old_rng), add = TRUE)
+    set.seed(seed)
+  }
   sig <- object$sigma
   if (!is.null(sigma)) {
     unknown <- setdiff(names(sigma), object$shocks)

@@ -45,9 +45,11 @@ otherwise ignored).}
 
 \item{thin}{Keep every \code{thin}-th post-burn draw.}
 
-\item{seed}{Optional RNG seed.}
+\item{seed}{Optional RNG seed. The previous state of the random number
+generator is restored on exit, so a seeded call does not disturb the
+caller's random stream.}
 
-\item{verbose}{Print progress.}
+\item{verbose}{Report progress with \code{\link[=message]{message()}}.}
 
 \item{object}{A \code{qpm_estimate}.}
 
@@ -82,9 +84,9 @@ at its current value.
 m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
                equations = eqs(x ~ rho * x[-1] + e),
                params = list(rho = 0.5))
-obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 200, seed = 1)
+obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 100, seed = 1)
 est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2), e = invgamma(1, 0.3)),
-                    iter = 1000, chains = 2, seed = 2, verbose = FALSE)
+                    iter = 300, chains = 2, seed = 2, verbose = FALSE)
 est
 }
 }

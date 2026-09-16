@@ -25,8 +25,10 @@
 #' @param burn Burn-in iterations (default `iter/2`).
 #' @param chains Number of chains (run sequentially).
 #' @param thin Keep every `thin`-th post-burn draw.
-#' @param seed Optional RNG seed.
-#' @param verbose Print progress.
+#' @param seed Optional RNG seed. The previous state of the random number
+#'   generator is restored on exit, so a seeded call does not disturb the
+#'   caller's random stream.
+#' @param verbose Report progress with [message()].
 #' @return An object of class `qpm_estimate`: posterior `draws` (natural
 #'   units), the `mode`, acceptance rate, split R-hat and effective
 #'   sample sizes, and the originating model/data. Use [coef()] to
@@ -37,9 +39,9 @@
 #' m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
 #'                equations = eqs(x ~ rho * x[-1] + e),
 #'                params = list(rho = 0.5))
-#' obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 200, seed = 1)
+#' obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 100, seed = 1)
 #' est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2), e = invgamma(1, 0.3)),
-#'                     iter = 1000, chains = 2, seed = 2, verbose = FALSE)
+#'                     iter = 300, chains = 2, seed = 2, verbose = FALSE)
 #' est
 #' }
 #' @export
@@ -52,7 +54,11 @@ qpm_estimate <- function(model, data, priors, observables = NULL,
   method <- match.arg(method)
   if (!inherits(priors, "qpm_priors"))
     stop("priors must come from priors()", call. = FALSE)
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    old_rng <- get0(".Random.seed", envir = globalenv(), inherits = FALSE)
+    on.exit(restore_rng(old_rng), add = TRUE)
+    set.seed(seed)
+  }
 
   ob <- estimation_objective(model, data, priors, observables,
                              measurement_error, kappa, method)
@@ -77,7 +83,7 @@ qpm_estimate <- function(model, data, priors, observables = NULL,
     v <- logpost_nat(to_nat(u))
     if (!is.finite(v)) 1e12 else -v
   }
-  if (verbose) cat("finding the posterior mode...\n")
+  if (verbose) message("finding the posterior mode...")
   u0 <- to_u(theta0)
   o1 <- if (length(u0) == 1L) {
     stats::optim(u0, neg_u, method = "Brent", lower = u0 - 20, upper = u0 + 20)
@@ -116,7 +122,7 @@ qpm_estimate <- function(model, data, priors, observables = NULL,
 
   lc <- log(2.38^2 / d)
   for (ch in seq_len(chains)) {
-    if (verbose) cat(sprintf("chain %d/%d: %d iterations...\n", ch, chains, iter))
+    if (verbose) message(sprintf("chain %d/%d: %d iterations...", ch, chains, iter))
     u <- u_mode + drop(chol(Sig + diag(1e-10, d)) %*% stats::rnorm(d)) * 0.1
     lp_u <- target_u(u)
     tries <- 0L

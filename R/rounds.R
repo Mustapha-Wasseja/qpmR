@@ -91,7 +91,10 @@ round_slug <- function(name) gsub("(^-|-$)", "", gsub("[^a-z0-9]+", "-", tolower
 #' audited without R.
 #'
 #' @param round A `qpm_round`.
-#' @param store Directory of the round store (created if missing).
+#' @param store Directory of the round store. `save_round()` creates it if
+#'   missing and has no default, so nothing is written unless you name the
+#'   location; the reading functions default to a `"rounds"` directory
+#'   under the working directory.
 #' @param overwrite Allow replacing an existing round of the same name.
 #' @return `save_round()` returns the round directory invisibly;
 #'   `load_round()` returns the `qpm_round`; `list_rounds()` returns a
@@ -106,8 +109,10 @@ round_slug <- function(name) gsub("(^-|-$)", "", gsub("[^a-z0-9]+", "-", tolower
 #' list_rounds(store)
 #' r2 <- load_round("demo", store)
 #' @export
-save_round <- function(round, store = "rounds", overwrite = FALSE) {
+save_round <- function(round, store, overwrite = FALSE) {
   stopifnot(inherits(round, "qpm_round"))
+  if (missing(store))
+    stop("store must be given: the directory to save the round in", call. = FALSE)
   dir <- file.path(store, round_slug(round$name))
   if (dir.exists(dir) && !overwrite)
     stop(sprintf("round '%s' already exists in %s (use overwrite = TRUE)",
