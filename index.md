@@ -2,19 +2,65 @@
 
 **Quarterly Projection Models for Monetary Policy Analysis in R.**
 
-qpmR builds, solves, and simulates the semi-structural quarterly
-projection models (QPM) used in central-bank Forecasting and Policy
-Analysis Systems (FPAS): output gap, Phillips curve, forward-looking
-policy rule, and exchange-rate block, with model-consistent
-expectations.
+qpmR builds, solves, filters, estimates and reports the semi-structural
+quarterly projection models (QPM) used in central-bank Forecasting and
+Policy Analysis Systems (FPAS): output gap, Phillips curve,
+forward-looking policy rule, and exchange-rate block, solved under
+model-consistent expectations.
 
 The goal is the workflow, not just the equations:
 
     data -> filtering -> gaps -> model -> baseline -> judgment -> scenarios -> report
 
-Version 0.1 delivers the model layer of that chain.
+Every stage of that chain is implemented, exercised end to end on a real
+quarterly dataset for Czechia that ships with the package, and
+cross-checked against Dynare. Documentation:
+<https://mustapha-wasseja.github.io/qpmR/>.
 
-## What works today (0.1)
+## Installation
+
+``` r
+
+install.packages("qpmR")            # from CRAN, once accepted
+
+# development version
+# install.packages("pak")
+pak::pak("Mustapha-Wasseja/qpmR")
+```
+
+## Quickstart
+
+``` r
+
+library(qpmR)
+
+m <- qpm_template("bkl")          # canonical small open economy QPM
+summary(m)
+
+sol <- qpm_solve(m)               # QZ solution + Blanchard-Kahn check
+sol
+
+ir <- irf(sol, shock = "eps_i")   # 100bp-style policy tightening
+plot(ir, vars = c("pi", "y_gap", "i", "q"))
+
+histq <- simulate(sol, nsim = 48, seed = 7, burn = 20)
+fc <- qpm_forecast(sol, from = histq, horizon = 12)
+plot(fc, vars = c("pi", "i", "y_gap", "q"))
+
+# transmission experiment: double exchange-rate pass-through
+m2 <- qpm_calibrate(m, b3 = 0.2)
+plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
+```
+
+The vignettes walk through the whole chain:
+[`vignette("qpmR-quickstart")`](https://mustapha-wasseja.github.io/qpmR/articles/qpmR-quickstart.md)
+takes a forecast round from data to report, and
+[`vignette("qpmR-estimation")`](https://mustapha-wasseja.github.io/qpmR/articles/qpmR-estimation.md)
+covers priors, posteriors, identification and Bayes factors.
+
+## What it does
+
+### The model layer
 
 - **A native R model language.** Declare gap-form models with
   [`qpm_model()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_model.md):
@@ -26,16 +72,23 @@ Version 0.1 delivers the model layer of that chain.
 - **A generalized-Schur (QZ) solver** (Klein 2000) with honest
   Blanchard–Kahn diagnostics: indeterminacy and explosiveness are
   reported as typed errors that say *which economics* usually causes
-  them (Taylor principle, pure-UIP unit roots).
+  them (Taylor principle, pure-UIP unit roots). Unit roots are counted
+  explicitly, so random-walk trends solve.
 - **The canonical Berg–Karam–Laxton small-open-economy QPM** as a
   calibrated template: `qpm_template("bkl")` — IS curve, hybrid Phillips
   curve, forward-looking inflation-targeting rule, dampened UIP, and
-  stationary trend/foreign processes, for an illustrative
-  emerging-economy calibration (“Meridia”, 5% inflation target).
-- **Model dynamics and forecasting:**
+  trend/foreign processes, for an illustrative emerging-economy
+  calibration (“Meridia”, 5% inflation target). `trends = "rw"` makes
+  the equilibrium exchange rate and potential growth unit-root
+  processes.
+- **Model dynamics:**
   [`irf()`](https://mustapha-wasseja.github.io/qpmR/reference/irf.md)
   with peak-effect tables,
-  [`simulate()`](https://rdrr.io/r/stats/simulate.html),
+  [`fevd()`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md)
+  for forecast error variance decompositions,
+  [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md)
+  for model-implied standard deviations and autocorrelations set against
+  the data’s, [`simulate()`](https://rdrr.io/r/stats/simulate.html),
   [`qpm_forecast()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_forecast.md)
   with analytic fan bands,
   [`steady_state()`](https://mustapha-wasseja.github.io/qpmR/reference/steady_state.md),
@@ -44,15 +97,16 @@ Version 0.1 delivers the model layer of that chain.
   [`qpm_lint()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_lint.md)
   for specification checks.
 
-And since 0.2 — the filtration layer:
+### Filtering
 
 - **[`qpm_filter()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_filter.md)**
   — Kalman filter + RTS smoother over the solved model: jointly infers
   every latent state (output gap, neutral rate, equilibrium exchange
   rate, trends) and the historical structural shocks from whatever
-  subset of variables you observe. Missing data and ragged edges
-  handled; innovation diagnostics (Ljung–Box, outlier flags) printed.
-  The likelihood is tested against the exact closed-form Gaussian
+  subset of variables you observe. Missing data and ragged edges are
+  handled; innovation diagnostics (Ljung–Box, outlier flags) are
+  printed. Unit-root models switch to a diffuse prior automatically. The
+  likelihood is tested against the exact closed-form Gaussian
   likelihood.
 - **[`qpm_decompose()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_decompose.md)**
   — exact historical shock decompositions of the smoothed history
@@ -61,13 +115,13 @@ And since 0.2 — the filtration layer:
 - **[`state_space()`](https://mustapha-wasseja.github.io/qpmR/reference/state_space.md)**
   — the exact `T`, `R`, `Z`, `H`, `Qc`, `P1` matrices used internally,
   exported so other estimators can build on qpmR.
-- **`qpm_forecast(from = <filtration>)`** — forecast from the smoothed
-  end-of-sample state, with the smoothed history on the fan chart.
-- **Random-walk trends and diffuse initialization** —
-  `qpm_template("bkl", trends = "rw")` makes the equilibrium exchange
-  rate and potential growth unit-root processes; the solver counts unit
-  roots explicitly and the filter switches to a diffuse prior
-  automatically.
+- **[`residuals()`](https://rdrr.io/r/stats/residuals.html),
+  [`fitted()`](https://rdrr.io/r/stats/fitted.values.html),
+  [`logLik()`](https://rdrr.io/r/stats/logLik.html) and
+  [`nobs()`](https://rdrr.io/r/stats/nobs.html)** on a filtration, so
+  [`AIC()`](https://rdrr.io/r/stats/AIC.html) and
+  [`BIC()`](https://rdrr.io/r/stats/AIC.html) work without special
+  handling.
 - **A real country dataset** — `czechia`, quarterly from 1996 in model
   units, compiled reproducibly from FRED/OECD/Eurostat/ECB public
   endpoints. Filtering it reproduces the known history: the pre-GFC
@@ -86,7 +140,7 @@ plot(fit, vars = c("y_gap", "dy_bar", "r_bar", "q_gap"))
 plot(qpm_decompose(fit), var = "pi4")
 ```
 
-And since 0.3 — the policy-analysis layer:
+### Forecasting and policy analysis
 
 - **[`qpm_condition()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_condition.md)**
   — hard conditional forecasts with the minimum-norm implied shocks
@@ -104,6 +158,12 @@ And since 0.3 — the policy-analysis layer:
   — judgment as a first-class, logged operation: state the change, qpmR
   back-solves the supporting shocks, records author/time/rationale, and
   flags anything requiring more than two standard deviations.
+- **[`qpm_risk()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_risk.md)
+  /
+  [`risk_log()`](https://mustapha-wasseja.github.io/qpmR/reference/risk_log.md)**
+  — a balance of risks: bands become two-piece normal, so the mode stays
+  on the projection while the mean shifts by the stated skew with total
+  variance held fixed.
 - **Forecast rounds** —
   [`qpm_round()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_round.md)
   archives the whole pipeline (model + calibration + data vintage +
@@ -136,7 +196,7 @@ rB <- add_judgment(qpm_round("2026-Q3 September", mcz, cz, horizon = 12),
 compare_rounds(rA, rB)
 ```
 
-And since 0.4 — the estimation layer:
+### Estimation
 
 - **[`priors()`](https://mustapha-wasseja.github.io/qpmR/reference/priors.md)**
   — a prior mini-language (`beta`, `gamma`, `invgamma`, `normal`,
@@ -151,6 +211,11 @@ And since 0.4 — the estimation layer:
   Metropolis seeded by the BFGS Hessian, split R-hat / ESS diagnostics,
   and a “learned” column comparing posterior to prior spread.
   `method = "mle"` uses the same machinery.
+  [`coef()`](https://rdrr.io/r/stats/coef.html),
+  [`vcov()`](https://rdrr.io/r/stats/vcov.html),
+  [`confint()`](https://rdrr.io/r/stats/confint.html),
+  [`summary()`](https://rdrr.io/r/base/summary.html) and
+  [`logLik()`](https://rdrr.io/r/stats/logLik.html) work on the result.
 - **[`posterior_forecast()`](https://mustapha-wasseja.github.io/qpmR/reference/posterior_forecast.md)**
   — fan charts that integrate over the posterior: every draw re-solves
   the model and re-filters the data.
@@ -161,50 +226,6 @@ And since 0.4 — the estimation layer:
 - **[`marginal_likelihood()`](https://mustapha-wasseja.github.io/qpmR/reference/marginal_likelihood.md)**
   — modified harmonic mean with a Laplace cross-check; differences
   across models are log Bayes factors.
-
-And in the development version (1.0 — reporting, audit, country
-adaptation):
-
-- **[`qpm_report()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_report.md)**
-  — a round becomes the monetary policy report: an executive summary
-  with the numbers filled in, fan charts, gaps, the shock decomposition,
-  the judgment ledger, the revision against the previous round, and a
-  reproducibility appendix. The `.Rmd` source is always written so teams
-  edit the text, not the plumbing; rendering degrades gracefully where
-  pandoc is unavailable.
-- **[`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)**
-  — the standard round chart set as a multi-page PDF.
-- **[`verify_round()`](https://mustapha-wasseja.github.io/qpmR/reference/verify_round.md)**
-  — re-runs an archived round and confirms the published numbers still
-  come back, flagging version drift and hand-edited CSV sidecars.
-
-``` r
-
-verify_round(r)                       # does the archive still reproduce?
-chart_pack(r, "chart_pack.pdf")
-qpm_report(r, "mpr.html", compare_to = previous_round)
-```
-
-- **[`add_block()`](https://mustapha-wasseja.github.io/qpmR/reference/add_block.md)**
-  — extension blocks that adapt a template to a country without forking
-  it, composable and recorded in the model.
-- **[`block_food_cpi()`](https://mustapha-wasseja.github.io/qpmR/reference/block_food_cpi.md)**
-  — headline CPI split into food and core, the configuration every
-  LIC/EM engagement needs and rebuilds by hand. A food supply shock
-  moves headline while leaving core untouched.
-- **[`block_fx_intervention()`](https://mustapha-wasseja.github.io/qpmR/reference/block_fx_intervention.md)**
-  — a managed float: one model spanning free float through peg by a
-  single `intensity` argument.
-- **[`qpm_diff()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_diff.md)**
-  — a country customization reviewed as a diff.
-
-``` r
-
-m <- add_block(qpm_template("bkl"), block_food_cpi(weight = 0.45))
-plot(irf(qpm_solve(m), shock = "eps_pifood"),
-     vars = c("pi_food", "pi", "pi_core", "i"))
-qpm_diff(qpm_template("bkl"), m)
-```
 
 ``` r
 
@@ -218,39 +239,65 @@ plot(est)                                   # prior vs posterior
 plot(posterior_forecast(est, horizon = 12)) # parameter-uncertainty fans
 ```
 
-## Quickstart
+### Country adaptation
+
+- **[`add_block()`](https://mustapha-wasseja.github.io/qpmR/reference/add_block.md)**
+  — extension blocks that adapt a template to a country without forking
+  it, composable and recorded in the model.
+- **[`block_food_cpi()`](https://mustapha-wasseja.github.io/qpmR/reference/block_food_cpi.md)**
+  — headline CPI split into food and core, the configuration every
+  LIC/EM engagement needs and rebuilds by hand. A food supply shock
+  moves headline while leaving core untouched.
+- **[`block_fx_intervention()`](https://mustapha-wasseja.github.io/qpmR/reference/block_fx_intervention.md)**
+  — a managed float: one model spanning free float through peg by a
+  single `intensity` argument.
+- **[`qpm_diff()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_diff.md)**
+  — a country customization reviewed as a diff of structure;
+  **[`qpm_compare_models()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_compare_models.md)**
+  compares behaviour (impulse responses and implied moments).
+- **[`qpm_disaggregate()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_disaggregate.md)**
+  — Denton-Cholette and Chow-Lin temporal disaggregation of annual data
+  to quarterly, for the many economies that publish national accounts
+  only annually.
 
 ``` r
 
-library(qpmR)
-
-m <- qpm_template("bkl")          # canonical small open economy QPM
-summary(m)
-
-sol <- qpm_solve(m)               # QZ solution + Blanchard-Kahn check
-sol
-
-ir <- irf(sol, shock = "eps_i")   # 100bp-style policy tightening
-plot(ir, vars = c("pi", "y_gap", "i", "q"))
-
-histq <- simulate(sol, nsim = 48, seed = 7, burn = 20)
-fc <- qpm_forecast(sol, from = histq, horizon = 12)
-plot(fc, vars = c("pi", "i", "y_gap", "q"))
-
-# transmission experiment: double exchange-rate pass-through
-m2 <- qpm_calibrate(m, b3 = 0.2)
-plot(irf(qpm_solve(m2), shock = "eps_q"), vars = c("pi", "i"))
+m <- add_block(qpm_template("bkl"), block_food_cpi(weight = 0.45))
+plot(irf(qpm_solve(m), shock = "eps_pifood"),
+     vars = c("pi_food", "pi", "pi_core", "i"))
+qpm_diff(qpm_template("bkl"), m)
 ```
 
-## Roadmap
+### Reporting, audit and policy experiments
 
-| Version | Focus |
-|----|----|
-| 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template — done |
-| 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) — done |
-| 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition — done |
-| 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette — done |
-| 1.0 | Country adaptation (extension blocks, [`qpm_diff()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_diff.md)), reporting ([`qpm_report()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_report.md), [`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)) and audit ([`verify_round()`](https://mustapha-wasseja.github.io/qpmR/reference/verify_round.md)) — done; CRAN submission next |
+- **[`qpm_report()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_report.md)**
+  — a round becomes the monetary policy report: an executive summary
+  with the numbers filled in, fan charts, gaps, the shock decomposition,
+  the judgment ledger, the revision against the previous round, and a
+  reproducibility appendix. The `.Rmd` source is always written so teams
+  edit the text, not the plumbing; rendering degrades gracefully where
+  pandoc is unavailable.
+- **[`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)**
+  — the standard round chart set as a multi-page PDF.
+- **[`verify_round()`](https://mustapha-wasseja.github.io/qpmR/reference/verify_round.md)**
+  — re-runs an archived round and confirms the published numbers still
+  come back, flagging version drift and hand-edited CSV sidecars.
+- **[`qpm_rule_eval()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)**
+  — score alternative policy rules over a grid by the unconditional
+  loss, computed exactly from the stationary covariance, and trace the
+  inflation-output variability frontier.
+- **[`qpm_counterfactual()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_counterfactual.md)**
+  — replay history with shocks switched off or scaled: “what if the
+  central bank had simply followed its rule?”
+- **[`write_dynare()`](https://mustapha-wasseja.github.io/qpmR/reference/write_dynare.md)**
+  — export any model as a Dynare `.mod` file.
+
+``` r
+
+verify_round(r)                       # does the archive still reproduce?
+chart_pack(r, "chart_pack.pdf")
+qpm_report(r, "mpr.html", compare_to = previous_round)
+```
 
 ## Does it agree with Dynare?
 
@@ -304,35 +351,52 @@ and
 
 ## Testing
 
-466 assertions across 18 files, at **87.7% line coverage** — measured on
+810 assertions across 28 files, at **89.7% line coverage** — measured on
 every push by the `test-coverage` workflow. The suite pins the solver to
 analytic solutions (AR(1), hybrid roots, brute-force perfect foresight),
-the Kalman filter to the exact closed-form Gaussian likelihood, the
-revision decomposition to exact telescoping, and the whole solver to
-Dynare (above).
-
-To publish the coverage percentage as a badge, add a `CODECOV_TOKEN`
-repository secret from <https://app.codecov.io>; the workflow already
-uploads to Codecov and only needs the token.
+the Kalman filter to the exact closed-form Gaussian likelihood and the
+compiled filter to its R reference, the revision decomposition to exact
+telescoping, and the whole solver to Dynare (above).
 
 ## Design commitments
 
 1.  **Everything has an escape hatch.** `sol$P`, `sol$Q`,
     [`eigen_table()`](https://mustapha-wasseja.github.io/qpmR/reference/eigen_table.md)
+    and
+    [`state_space()`](https://mustapha-wasseja.github.io/qpmR/reference/state_space.md)
     expose the actual matrices; nothing is hidden in closures.
 2.  **Errors teach.** A Blanchard–Kahn failure names the economics that
     usually causes it, not just the rank condition it violates.
 3.  **Verification is cheap.** The test suite pins the solver to
-    analytic solutions; cross-checks against Dynare are planned for the
-    shipped templates.
+    analytic solutions and to Dynare for the shipped templates, and
+    every compiled path to its R reference implementation.
+
+## Roadmap
+
+| Version | Focus |
+|----|----|
+| 0.1 | Model DSL, QZ solver, BK diagnostics, IRFs, simulation, forecasts, BKL template |
+| 0.2 | Kalman filter/smoother, shock decompositions, unit-root trends with diffuse initialization, real country dataset (`czechia`) |
+| 0.3 | Conditional forecasts (anticipated vs unanticipated), scenarios, judgment ledger, forecast rounds, round store, revision decomposition |
+| 0.4 | Bayesian estimation (priors, adaptive RWM, R-hat/ESS), identification diagnostics, marginal likelihood, posterior fans, estimation vignette |
+| 1.0 | Country adaptation (extension blocks, [`qpm_diff()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_diff.md)), reporting ([`qpm_report()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_report.md), [`chart_pack()`](https://mustapha-wasseja.github.io/qpmR/reference/chart_pack.md)) and audit ([`verify_round()`](https://mustapha-wasseja.github.io/qpmR/reference/verify_round.md)) |
+| 1.1 | Compiled Kalman filter and Lyapunov solver, [`fevd()`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md), [`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md), balance of risks, rule evaluation, counterfactuals, model comparison, temporal disaggregation, standard R generics, Dynare cross-check, pkgdown site; CRAN submission |
+| next | Exact Durbin-Koopman diffuse initialization |
 
 ## References
 
 - Berg, A., Karam, P., & Laxton, D. (2006). *A Practical Model-Based
-  Approach to Monetary Policy Analysis — Overview* (IMF WP/06/80) and
-  the companion how-to guide (IMF WP/06/81).
+  Approach to Monetary Policy Analysis — Overview* (IMF WP/06/80,
+  <https://doi.org/10.5089/9781451863406.001>) and *Practical
+  Model-Based Monetary Policy Analysis — A How-To Guide* (IMF WP/06/81,
+  <https://doi.org/10.5089/9781451863413.001>).
 - Klein, P. (2000). Using the generalized Schur form to solve a
-  multivariate linear rational expectations model. *JEDC* 24(10).
+  multivariate linear rational expectations model. *Journal of Economic
+  Dynamics and Control* 24(10), 1405–1423.
+  <https://doi.org/10.1016/S0165-1889(99)00045-7>
+- Iskrev, N. (2010). Local identification in DSGE models. *Journal of
+  Monetary Economics* 57(2), 189–202.
+  <https://doi.org/10.1016/j.jmoneco.2009.12.007>
 
 ## License
 

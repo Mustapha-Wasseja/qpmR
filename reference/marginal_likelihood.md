@@ -52,14 +52,14 @@ models. Econometric Reviews, 18(1), 1-73.
 m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
                equations = eqs(x ~ rho * x[-1] + e),
                params = list(rho = 0.5))
-obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 150, seed = 1)
+obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 120, seed = 1)
 est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2)),
-                    iter = 1000, chains = 2, seed = 2, verbose = FALSE)
+                    iter = 300, chains = 2, seed = 2, verbose = FALSE)
 marginal_likelihood(est)
-#> <qpm_logml> log marginal likelihood: -201.22
-#>   modified harmonic mean over 1000 draws, 1 parameters
-#>   by truncation: -201.11, -201.27, -201.26, -201.23, -201.25 (spread 0.16)
-#>   Laplace approximation: -201.31
+#> <qpm_logml> log marginal likelihood: -159.15
+#>   modified harmonic mean over 300 draws, 1 parameters
+#>   by truncation: -159.28, -158.97, -159.16, -159.22, -159.13 (spread 0.31)
+#>   Laplace approximation: -159.09
 #>   differences across models on the same data are log Bayes factors
 # }
 ```

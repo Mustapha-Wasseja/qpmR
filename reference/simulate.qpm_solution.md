@@ -25,7 +25,8 @@ simulate(object, nsim = 40, seed = NULL, sigma = NULL, burn = 0, ...)
 
 - seed:
 
-  Optional seed for reproducibility.
+  Optional seed for reproducibility. The previous RNG state is restored
+  on exit.
 
 - sigma:
 

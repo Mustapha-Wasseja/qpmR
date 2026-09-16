@@ -46,7 +46,7 @@ obs$period <- next_quarters("2016-Q1", 40)
 r <- qpm_round("demo", m, obs[, c("period", "pi", "i", "q")], horizon = 8)
 verify_round(r)
 #> <qpm_verification> demo
-#>   archived under qpmR 1.0.0.9000, verified under 1.0.0.9000
+#>   archived under qpmR 1.1.0, verified under 1.1.0
 #>   re-ran the pipeline with 0 conditions and 0 judgment entries
 #>   v forecast reproduces exactly (largest deviation 0)
 ```

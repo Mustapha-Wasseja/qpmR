@@ -76,11 +76,14 @@ coef(object, type = c("mean", "mode", "median"), ...)
 
 - seed:
 
-  Optional RNG seed.
+  Optional RNG seed. The previous state of the random number generator
+  is restored on exit, so a seeded call does not disturb the caller's
+  random stream.
 
 - verbose:
 
-  Print progress.
+  Report progress with
+  [`message()`](https://rdrr.io/r/base/message.html).
 
 - object:
 
@@ -118,15 +121,15 @@ current value.
 m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
                equations = eqs(x ~ rho * x[-1] + e),
                params = list(rho = 0.5))
-obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 200, seed = 1)
+obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 100, seed = 1)
 est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2), e = invgamma(1, 0.3)),
-                    iter = 1000, chains = 2, seed = 2, verbose = FALSE)
+                    iter = 300, chains = 2, seed = 2, verbose = FALSE)
 est
-#> <qpm_estimate> Bayesian (adaptive RWM) - 2 parameters, 2 chains x 1000 draws (burn 500, acceptance 0.28)
-#>   log-posterior at mode: -268.79
+#> <qpm_estimate> Bayesian (adaptive RWM) - 2 parameters, 2 chains x 300 draws (burn 150, acceptance 0.29)
+#>   log-posterior at mode: -130.68
 #>   param      prior                  mode     mean       5%      95%  R-hat    ESS learned
-#>   rho        beta(0.5, 0.2)        0.790    0.790    0.730    0.855   1.01    162 yes
-#>   e          invgamma(1, 0.3)      0.925    0.924    0.857    0.998   1.01    127 yes
+#>   rho        beta(0.5, 0.2)        0.723    0.717    0.645    0.799   1.00     56 yes
+#>   e          invgamma(1, 0.3)      0.894    0.910    0.807    1.041   1.01     47 yes
 #>   'learned' compares posterior to prior sd (yes < 0.5 < some < 0.9 < little)
 # }
 ```

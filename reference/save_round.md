@@ -8,7 +8,7 @@ judgment was applied) so that a round can be audited without R.
 ## Usage
 
 ``` r
-save_round(round, store = "rounds", overwrite = FALSE)
+save_round(round, store, overwrite = FALSE)
 
 load_round(name, store = "rounds")
 
@@ -23,7 +23,10 @@ list_rounds(store = "rounds")
 
 - store:
 
-  Directory of the round store (created if missing).
+  Directory of the round store. `save_round()` creates it if missing and
+  has no default, so nothing is written unless you name the location;
+  the reading functions default to a `"rounds"` directory under the
+  working directory.
 
 - overwrite:
 
@@ -51,6 +54,6 @@ store <- file.path(tempdir(), "rounds")
 save_round(r, store)
 list_rounds(store)
 #>   name          created data_to horizon n_judgment
-#> 1 demo 2026-08-26 20:51 2026-Q1       8          0
+#> 1 demo 2026-09-16 09:50 2026-Q1       8          0
 r2 <- load_round("demo", store)
 ```

@@ -15,7 +15,7 @@ previous round, and a reproducibility appendix."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">qpmR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@ previous round, and a reproducibility appendix.</p>
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">qpm_report</span><span class="op">(</span></span>
 <span>  <span class="va">round</span>,</span>
-<span>  file <span class="op">=</span> <span class="st">"mpr.html"</span>,</span>
+<span>  <span class="va">file</span>,</span>
 <span>  compare_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  store <span class="op">=</span> <span class="st">"rounds"</span>,</span>
 <span>  render <span class="op">=</span> <span class="cn">TRUE</span>,</span>
@@ -76,7 +76,8 @@ previous round, and a reproducibility appendix.</p>
 
 
 <dt id="arg-file">file<a class="anchor" aria-label="anchor" href="#arg-file"></a></dt>
-<dd><p>Output path. The extension chooses the format
+<dd><p>Output path; required, so that nothing is written unless a
+location is named. The extension chooses the format
 (<code>.html</code>, <code>.pdf</code>, <code>.docx</code>), or <code>.Rmd</code> to write the source only.</p></dd>
 
 

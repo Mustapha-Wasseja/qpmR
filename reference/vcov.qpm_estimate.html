@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">qpmR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.1.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -86,13 +86,13 @@ credible intervals (posterior quantiles, not asymptotic intervals).</p>
 <span class="r-in"><span>               params <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">obs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/simulate.html" class="external-link">simulate</a></span><span class="op">(</span><span class="fu"><a href="qpm_solve.html">qpm_solve</a></span><span class="op">(</span><span class="fu"><a href="qpm_calibrate.html">qpm_calibrate</a></span><span class="op">(</span><span class="va">m</span>, rho <span class="op">=</span> <span class="fl">0.8</span><span class="op">)</span><span class="op">)</span>, nsim <span class="op">=</span> <span class="fl">120</span>, seed <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">est</span> <span class="op">&lt;-</span> <span class="fu"><a href="qpm_estimate.html">qpm_estimate</a></span><span class="op">(</span><span class="va">m</span>, <span class="va">obs</span>, <span class="fu"><a href="priors.html">priors</a></span><span class="op">(</span>rho <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Special.html" class="external-link">beta</a></span><span class="op">(</span><span class="fl">0.5</span>, <span class="fl">0.2</span><span class="op">)</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                    iter <span class="op">=</span> <span class="fl">600</span>, chains <span class="op">=</span> <span class="fl">2</span>, seed <span class="op">=</span> <span class="fl">2</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                    iter <span class="op">=</span> <span class="fl">300</span>, chains <span class="op">=</span> <span class="fl">1</span>, seed <span class="op">=</span> <span class="fl">2</span>, verbose <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/vcov.html" class="external-link">vcov</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             rho</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rho 0.003439043</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rho 0.002844212</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>          5.0%     95.0%</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rho 0.6364812 0.8354914</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rho 0.6432014 0.8089577</span>
 <span class="r-in"><span><span class="co"># }</span></span></span>
 </code></pre></div>
     </div>

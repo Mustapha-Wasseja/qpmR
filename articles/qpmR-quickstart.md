@@ -334,7 +334,7 @@ judged <- add_judgment(base, pi4 = stats::setNames(0.4, base$periods[3]),
 judgment_log(judged)
 #> <judgment ledger> 1 entry
 #>  id time             author      variable period  add   target
-#>  1  2026-08-26 20:51 prices desk pi4      2027-Q1 +0.40 2.5   
+#>  1  2026-09-16 09:50 prices desk pi4      2027-Q1 +0.40 2.5   
 #>  rationale                       
 #>  announced energy-tariff increase
 #>   implied shocks, max |sd|: eps_y 0.04, eps_pi 0.20, eps_i 0.04, eps_q 0.09, eps_qbar 0.01, eps_rbar 0.01, eps_ystar 0.01, eps_istar 0.03, eps_pistar 0.02, eps_prem 0.05
@@ -392,7 +392,7 @@ published numbers against the archive:
 
 verify_round(rB)
 #> <qpm_verification> 2026-Q3 September
-#>   archived under qpmR 1.0.0.9000, verified under 1.0.0.9000
+#>   archived under qpmR 1.1.0, verified under 1.1.0
 #>   re-ran the pipeline with 0 conditions and 1 judgment entry
 #>   v forecast reproduces exactly (largest deviation 0)
 ```
@@ -417,11 +417,22 @@ qpm_report(rB, "mpr.html", compare_to = rA)
 always writes the `.Rmd` source next to its output, on the principle
 that institutions replace the template’s *text*, not its plumbing.
 
-## Where this is going
+## Where to go next
 
 Estimation — priors, posterior sampling on the filter likelihood,
 identification diagnostics, marginal likelihoods, and posterior fan
 charts — is covered in
 [`vignette("qpmR-estimation")`](https://mustapha-wasseja.github.io/qpmR/articles/qpmR-estimation.md).
-Next on the roadmap: the full FPAS reporting workflow (Quarto report
-templates, chart packs). See the README.
+The policy experiments build on the same objects:
+[`qpm_rule_eval()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_rule_eval.md)
+scores alternative rules on the inflation-output variability frontier,
+[`qpm_counterfactual()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_counterfactual.md)
+replays history with shocks switched off,
+[`qpm_compare_models()`](https://mustapha-wasseja.github.io/qpmR/reference/qpm_compare_models.md)
+sets two models’ impulse responses and moments side by side, and
+[`fevd()`](https://mustapha-wasseja.github.io/qpmR/reference/fevd.md)
+and
+[`model_properties()`](https://mustapha-wasseja.github.io/qpmR/reference/model_properties.md)
+report which shocks drive which variables.
+[`write_dynare()`](https://mustapha-wasseja.github.io/qpmR/reference/write_dynare.md)
+exports any model as a `.mod` file for an independent check in Dynare.

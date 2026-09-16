@@ -38,11 +38,11 @@ m <- qpm_model(variables = vars(x = "x"), shocks = shocks(e),
                params = list(rho = 0.5))
 obs <- simulate(qpm_solve(qpm_calibrate(m, rho = 0.8)), nsim = 120, seed = 1)
 est <- qpm_estimate(m, obs, priors(rho = beta(0.5, 0.2)),
-                    iter = 600, chains = 2, seed = 2, verbose = FALSE)
+                    iter = 300, chains = 1, seed = 2, verbose = FALSE)
 summary(est)
 #>   parameter          prior      mode      mean         sd     lower     upper
-#> 1       rho beta(0.5, 0.2) 0.7335069 0.7333054 0.05864336 0.6364812 0.8354914
+#> 1       rho beta(0.5, 0.2) 0.7335069 0.7320151 0.05333115 0.6432014 0.8089577
 #>       rhat      ess
-#> 1 1.019201 165.9419
+#> 1 1.018161 46.14356
 # }
 ```

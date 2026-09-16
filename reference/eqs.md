@@ -31,6 +31,6 @@ eqs(
 )
 #> [[1]]
 #> pi ~ b1 * pi[-1] + (1 - b1) * E(pi[+1]) + b2 * y_gap + eps_pi
-#> <environment: 0x557f4133ccc8>
+#> <environment: 0x564e4254c238>
 #> 
 ```

@@ -11,7 +11,7 @@ and a reproducibility appendix.
 ``` r
 qpm_report(
   round,
-  file = "mpr.html",
+  file,
   compare_to = NULL,
   store = "rounds",
   render = TRUE,
@@ -28,8 +28,9 @@ qpm_report(
 
 - file:
 
-  Output path. The extension chooses the format (`.html`, `.pdf`,
-  `.docx`), or `.Rmd` to write the source only.
+  Output path; required, so that nothing is written unless a location is
+  named. The extension chooses the format (`.html`, `.pdf`, `.docx`), or
+  `.Rmd` to write the source only.
 
 - compare_to:
 
