@@ -33,6 +33,11 @@
   6000-draw estimate from about 18 minutes to under 3. The compiled
   filter is now the largest single cost, which is where the time should
   be: the QZ decomposition is 3.5 ms and model assembly 1.7 ms.
+* The eigenvalue table behind `eigen_table()` is assembled directly from
+  the QZ output rather than through `data.frame()`, whose constructor,
+  reorder and row-name reset were about a fifth of a posterior draw on
+  small models even though the estimation objective never reads the
+  table. The table itself is unchanged.
 
 ## New features
 
@@ -93,6 +98,8 @@
 
 ## Smaller changes
 
+* Printing a solved model whose stable roots are all unit roots (a pure
+  random walk) no longer reports `-Inf` as the largest stable root.
 * `write_dynare()` no longer writes a file by default: `file = NULL` (the
   new default) returns the Dynare source as a character vector, and a
   file is written only when a path is given. `qpm_report()` and

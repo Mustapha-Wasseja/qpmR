@@ -249,12 +249,20 @@ solve_klein <- function(A, B, C, D, unit_tol = 1e-6) {
   n_stable <- sum(sel)
   n_unit <- sum(abs(mod[sel == 1L] - 1) < unit_tol)
 
-  eigen_df <- data.frame(modulus = mod_o,
-                         stable = mod_o < 1 + unit_tol,
-                         unit = abs(mod_o - 1) < unit_tol,
-                         infinite = !is.finite(mod_o))
-  eigen_df <- eigen_df[order(eigen_df$modulus), , drop = FALSE]
-  rownames(eigen_df) <- NULL
+  # The eigenvalue table is assembled by hand rather than with data.frame().
+  # Estimation solves the model once per posterior draw and never reads the
+  # table, yet data.frame() plus the reorder and rownames<- cost several
+  # times the QZ decomposition itself on small models (about a fifth of a
+  # draw on an AR(1)). The object is identical: a data frame sorted by
+  # modulus with automatic row names, as eigen_table() documents.
+  o <- order(mod_o)
+  mod_s <- mod_o[o]
+  eigen_df <- structure(list(modulus = mod_s,
+                             stable = mod_s < 1 + unit_tol,
+                             unit = abs(mod_s - 1) < unit_tol,
+                             infinite = !is.finite(mod_s)),
+                        row.names = .set_row_names(length(mod_s)),
+                        class = "data.frame")
   counts <- list(stable = n_stable, unit = n_unit,
                  unstable = sum(is.finite(mod)) - n_stable,
                  infinite = sum(!is.finite(mod)),
@@ -338,11 +346,14 @@ print.qpm_solution <- function(x, ...) {
               ct$stable, ct$predetermined))
   fin <- x$eigen$modulus[is.finite(x$eigen$modulus) & !x$eigen$unit]
   st <- fin[fin < 1]; un <- fin[fin >= 1]
-  cat(sprintf("  roots: largest stable %.3f%s%s%s\n",
-              max(st),
-              if (ct$unit %||% 0) sprintf(", %d unit (random-walk trends -> diffuse filtering)", ct$unit) else "",
-              if (length(un)) sprintf(", smallest unstable %.3f", min(un)) else "",
-              if (ct$infinite) sprintf(", %d infinite", ct$infinite) else ""))
+  # When every stable root is a unit root (a pure random walk) st is empty:
+  # omit the "largest stable" figure rather than print max(numeric(0)) = -Inf.
+  parts <- c(
+    if (length(st)) sprintf("largest stable %.3f", max(st)),
+    if (ct$unit %||% 0) sprintf("%d unit (random-walk trends -> diffuse filtering)", ct$unit),
+    if (length(un)) sprintf("smallest unstable %.3f", min(un)),
+    if (ct$infinite) sprintf("%d infinite", ct$infinite))
+  cat(sprintf("  roots: %s\n", paste(parts, collapse = ", ")))
   ssv <- steady_state(x)
   ps <- paste(names(ssv), "=", fmt_num(round(ssv, 6)), collapse = ", ")
   cat(if ((x$ss_free %||% 0) > 0)

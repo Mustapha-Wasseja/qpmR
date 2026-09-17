@@ -43,6 +43,19 @@ test_that("pure random walks solve with a unit root", {
   expect_equal(unname(steady_state(sol)["x"]), 0)   # free level, min-norm
 })
 
+test_that("printing a pure random walk emits no warning", {
+  sol <- qpm_solve(toy(x ~ x[-1] + e))
+  expect_no_warning(out <- capture.output(print(sol)))
+  expect_false(any(grepl("-Inf", out, fixed = TRUE)))
+  expect_output(print(sol), "roots: 1 unit", fixed = TRUE)
+})
+
+test_that("the roots line still reports the largest stable root beside a unit root", {
+  m <- qpm_model(name = "mix", variables = vars(x = "x", y = "y"), shocks = shocks(e, u),
+                 equations = eqs(x ~ x[-1] + e, y ~ 0.5 * y[-1] + u))
+  expect_output(print(qpm_solve(m)), "largest stable 0.500, 1 unit", fixed = TRUE)
+})
+
 test_that("a drifted random walk has no steady state and says so", {
   expect_error(qpm_solve(toy(x ~ x[-1] + 0.5 + e)), class = "qpm_no_steady_state")
 })

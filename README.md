@@ -294,7 +294,7 @@ Lyapunov equation is solved by `O(N^3)` squaring rather than the
 
 ## Testing
 
-810 assertions across 28 files, at **89.7% line coverage** — measured on
+More than 800 assertions across 28 files, at about **90% line coverage** — measured on
 every push by the `test-coverage` workflow. The suite pins the solver to
 analytic solutions (AR(1), hybrid roots, brute-force perfect foresight),
 the Kalman filter to the exact closed-form Gaussian likelihood and the
