@@ -46,6 +46,7 @@
 <li>The parameter-independent structure of the first-order system — which auxiliary states are needed, the expanded state vector, and the exact cell of <code>A</code>, <code>B</code>, <code>C</code> or <code>D</code> that each coefficient lands in — is now computed once per model and cached on it. Estimation re-solves the same equations thousands of times with different numbers, so only the values are recomputed: <code>build_first_order()</code> went from 27.5 ms to 1.7 ms (<strong>16x</strong>) and <code><a href="../reference/qpm_solve.html">qpm_solve()</a></code> from 37 ms to 8.3 ms. The cache is rebuilt automatically if it is missing (a model serialised by an older version) or no longer matches its equations. Linearity is checked once at construction rather than on every solve, since it is a property of the equations.</li>
 <li>Coefficient extraction reuses one evaluation environment per equation instead of rebuilding it per symbol.</li>
 <li>Together these take a posterior draw on the Czech model (22 states, 110 quarters) from 181 ms to 27 ms — <strong>6.7x end to end</strong>, or a 6000-draw estimate from about 18 minutes to under 3. The compiled filter is now the largest single cost, which is where the time should be: the QZ decomposition is 3.5 ms and model assembly 1.7 ms.</li>
+<li>The eigenvalue table behind <code><a href="../reference/eigen_table.html">eigen_table()</a></code> is assembled directly from the QZ output rather than through <code><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame()</a></code>, whose constructor, reorder and row-name reset were about a fifth of a posterior draw on small models even though the estimation objective never reads the table. The table itself is unchanged.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="new-features-1-1-0">New features<a class="anchor" aria-label="anchor" href="#new-features-1-1-0"></a></h3>
@@ -71,7 +72,8 @@
 </ul></div>
 <div class="section level3">
 <h3 id="smaller-changes-1-1-0">Smaller changes<a class="anchor" aria-label="anchor" href="#smaller-changes-1-1-0"></a></h3>
-<ul><li>
+<ul><li>Printing a solved model whose stable roots are all unit roots (a pure random walk) no longer reports <code>-Inf</code> as the largest stable root.</li>
+<li>
 <code><a href="../reference/write_dynare.html">write_dynare()</a></code> no longer writes a file by default: <code>file = NULL</code> (the new default) returns the Dynare source as a character vector, and a file is written only when a path is given. <code><a href="../reference/qpm_report.html">qpm_report()</a></code> and <code><a href="../reference/save_round.html">save_round()</a></code> likewise require an output path and a store directory rather than defaulting to the working directory.</li>
 <li>
 <code><a href="../reference/qpm_estimate.html">qpm_estimate()</a></code> reports progress with <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code> rather than <code><a href="https://rdrr.io/r/base/cat.html" class="external-link">cat()</a></code>, so <code><a href="https://rdrr.io/r/base/message.html" class="external-link">suppressMessages()</a></code> silences it.</li>
