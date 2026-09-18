@@ -100,6 +100,12 @@
 
 * Printing a solved model whose stable roots are all unit roots (a pure
   random walk) no longer reports `-Inf` as the largest stable root.
+* Conditional fan bands (`qpm_condition()`, `add_judgment()`, scenarios) are
+  computed from the conditioned rows and the diagonal of the stacked-path
+  covariance rather than from the full `(H N) x (H N)` matrix, which was the
+  package's one large matrix product and imposed a size cap above which
+  bands fell back to the unconditional ones. The cap is gone; band values
+  agree with the previous formula to 1e-9.
 * `write_dynare()` no longer writes a file by default: `file = NULL` (the
   new default) returns the Dynare source as a character vector, and a
   file is written only when a path is given. `qpm_report()` and

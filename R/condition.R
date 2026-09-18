@@ -98,20 +98,23 @@ recondition <- function(fc, anticipated, instruments) {
   dev_new <- fc$baseline_dev + matrix(G %*% (u * sig_stack), H, N, byrow = TRUE)
   colnames(dev_new) <- sol$vars_all
 
-  # conditional uncertainty: Gaussian conditioning over ALL shocks
+  # conditional uncertainty: Gaussian conditioning over ALL shocks. Only the
+  # diagonal of the stacked-path covariance Sx = Gs Gs' and its conditioned
+  # rows and columns are needed, so those are formed directly: (H N) x n_cond
+  # and n_cond x n_cond products instead of the full (H N) x (H N) matrix,
+  # which was the one large BLAS call in the package and forced a size cap.
   sd_new <- fc$sd_uncond
-  if (H * N <= 4000) {
-    Sx <- Gs %*% t(Gs)
-    SxS <- Sx[, rsel, drop = FALSE]
-    ridge <- 1e-12 * max(mean(diag(Sx)), .Machine$double.xmin)
-    W <- tryCatch(solve(Sx[rsel, rsel, drop = FALSE] +
-                          diag(ridge, length(rsel)), t(SxS)),
-                  error = function(cnd) NULL)
-    if (!is.null(W)) {
-      Vc_diag <- pmax(diag(Sx) - rowSums(SxS * t(W)), 0)
-      sd_new <- matrix(sqrt(Vc_diag), H, N, byrow = TRUE)
-      colnames(sd_new) <- sol$vars_all
-    }
+  Gr <- Gs[rsel, , drop = FALSE]
+  SxS <- Gs %*% t(Gr)                       # Sx[, rsel]
+  Srr <- Gr %*% t(Gr)                       # Sx[rsel, rsel]
+  dSx <- rowSums(Gs * Gs)                   # diag(Sx)
+  ridge <- 1e-12 * max(mean(dSx), .Machine$double.xmin)
+  W <- tryCatch(solve(Srr + diag(ridge, length(rsel)), t(SxS)),
+                error = function(cnd) NULL)
+  if (!is.null(W)) {
+    Vc_diag <- pmax(dSx - rowSums(SxS * t(W)), 0)
+    sd_new <- matrix(sqrt(Vc_diag), H, N, byrow = TRUE)
+    colnames(sd_new) <- sol$vars_all
   }
 
   fc$dev <- dev_new
