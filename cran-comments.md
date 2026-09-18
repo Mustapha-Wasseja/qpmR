@@ -13,6 +13,12 @@ Bayesian estimation and reporting.
   PDF manual)
 * GitHub Actions: Ubuntu 24.04 (R-devel, R-release, R-oldrel),
   Windows Server (R-release), macOS (R-release)
+* R-hub v2, R-devel: clang-asan, clang-ubsan, gcc-asan, nold (no long
+  double), atlas, mkl, intel, lto, donttest, gcc16, clang22,
+  nosuggests (build, vignettes and examples), and valgrind
+  (installation and examples; the test suite exceeds the runner's time
+  limit under valgrind)
+* win-builder, R-devel
 
 ## R CMD check results
 
@@ -23,14 +29,16 @@ The one NOTE is the expected
     Maintainer: 'Mustapha Mohammed <mustapha.wasseja.mohammed@gmail.com>'
     New submission
 
-from CRAN's incoming feasibility check.
+from CRAN's incoming feasibility check. All R-hub platforms above report
+Status: OK with no NOTEs.
 
 ## Notes for the reviewer
 
 * The package contains compiled code: a Kalman filter and a Lyapunov
   solver in C++ via RcppArmadillo. Reference implementations in R are
   kept, and the test suite checks that the compiled and R paths agree
-  to machine precision.
+  to machine precision. The address and undefined-behaviour sanitizer
+  builds (clang and gcc) and valgrind report no findings.
 * All examples run in a few seconds. The procedures that sample from a
   posterior (Markov chain Monte Carlo estimation, marginal likelihoods,
   posterior forecasts) are wrapped in `\donttest{}` and sized to run
@@ -40,7 +48,7 @@ from CRAN's incoming feasibility check.
   unrendered source with a message rather than failing, so the examples
   and tests do not require pandoc. The `quarto` package is used
   conditionally (guarded by `requireNamespace()`) and is listed in
-  Suggests.
+  Suggests; the tests run only where testthat is installed.
 * No function writes to the file system unless the user supplies a
   path; examples, tests and vignettes write only to `tempdir()`.
 * The bundled `czechia` dataset is compiled from public statistical
