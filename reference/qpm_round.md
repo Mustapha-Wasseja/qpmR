@@ -85,7 +85,7 @@ r <- qpm_round("test round", m, obs[, c("period", "pi", "i", "q")],
                horizon = 8)
 r
 #> <qpm_round> test round
-#>   created 2026-09-19 07:13 - qpmR 1.1.0
+#>   created 2026-09-19 07:24 - qpmR 1.1.0
 #>   model: Canonical small open economy QPM (BKL, stationary trends) - 25 parameters
 #>   data: 2016-Q2 ... 2026-Q1 (40 quarters) - observables: pi, i, q
 #>   filter: log-likelihood -195.15
