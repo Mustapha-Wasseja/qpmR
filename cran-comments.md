@@ -26,7 +26,7 @@ Bayesian estimation and reporting.
 
 The one NOTE is the expected
 
-    Maintainer: 'Mustapha Mohammed <mustapha.wasseja.mohammed@gmail.com>'
+    Maintainer: 'Mustapha Mohammed <muswaseja@gmail.com>'
     New submission
 
 from CRAN's incoming feasibility check. The eleven R-hub platforms that ran
