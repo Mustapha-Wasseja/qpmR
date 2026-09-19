@@ -32,6 +32,11 @@ The one NOTE is the expected
 from CRAN's incoming feasibility check. The eleven R-hub platforms that ran
 to completion report Status: OK with no NOTEs.
 
+win-builder (R-devel, 2026-09-16 r90549) returned the same single NOTE. The
+words it lists as possibly misspelled in the Description are the surnames
+of cited authors (Blanchard and Kahn, Kalman, Schur, Iskrev, Karam and
+Laxton) and "disaggregated", which is standard usage.
+
 ## Notes for the reviewer
 
 * The package contains compiled code: a Kalman filter and a Lyapunov
