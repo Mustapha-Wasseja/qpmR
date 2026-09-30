@@ -2,6 +2,8 @@
 
 ## qpmR 1.1.0
 
+CRAN release: 2026-09-29
+
 ### Speed
 
 - A compiled (C++/RcppArmadillo) Kalman filter, used by default. It is a

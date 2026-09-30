@@ -21,7 +21,7 @@ cross-checked against Dynare. Documentation:
 
 ``` r
 
-install.packages("qpmR")            # from CRAN, once accepted
+install.packages("qpmR")            # from CRAN
 
 # development version
 # install.packages("pak")

@@ -38,7 +38,7 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="1.1.0" id="qpmr-110">qpmR 1.1.0<a class="anchor" aria-label="anchor" href="#qpmr-110"></a></h2>
+<h2 class="pkg-version" data-toc-text="1.1.0" id="qpmr-110">qpmR 1.1.0<a class="anchor" aria-label="anchor" href="#qpmr-110"></a></h2><p class="text-muted">CRAN release: 2026-09-29</p>
 <div class="section level3">
 <h3 id="speed-1-1-0">Speed<a class="anchor" aria-label="anchor" href="#speed-1-1-0"></a></h3>
 <ul><li>A compiled (C++/RcppArmadillo) Kalman filter, used by default. It is a line-for-line match of the reference implementation kept in R, down to the Cholesky factorisation and Joseph-form update, and the two are tested to agree to machine precision on real data, with missing observations, with measurement error, and on the collinear case that raises <code>qpm_singular_F</code>. Set <code>options(qpmR.use_cpp = FALSE)</code> to force the R path; <code><a href="../reference/qpm_use_cpp.html">qpm_use_cpp()</a></code> reports which is in use.</li>
