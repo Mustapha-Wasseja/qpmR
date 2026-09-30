@@ -56,6 +56,6 @@ sol <- qpm_solve(qpm_template("bkl"))
 ss <- state_space(sol, observables = c("pi", "i", "q"))
 dim(ss$T); ss$d
 #> [1] 22 22
-#>            pi             i             q 
-#>  5.000000e+00  9.000000e+00 -2.942091e-14 
+#>           pi            i            q 
+#> 5.000000e+00 9.000000e+00 2.531308e-14 
 ```
